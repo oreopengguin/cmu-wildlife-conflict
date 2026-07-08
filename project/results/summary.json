@@ -1,0 +1,272 @@
+{
+  "scenario": "SSP2-4.5 (2081-2100)",
+  "species": {
+    "Ursus arctos": {
+      "common": "Brown bear",
+      "W_shift_km": 457.0200001405002,
+      "frag_present": {
+        "n_patches": 132,
+        "total_persistence": 24.77399206117161,
+        "mean_persistence": 0.11862732551261698,
+        "n_loops": 1937
+      },
+      "frag_future": {
+        "n_patches": 80,
+        "total_persistence": 18.259462181930985,
+        "mean_persistence": 0.13688307688371423,
+        "n_loops": 1888
+      },
+      "topo_change_W1": 7.54666265789532,
+      "observed_shift": {
+        "d_lon": 3.910311,
+        "d_lat": -0.5101420000000019,
+        "n_past": 9833,
+        "n_recent": 8526
+      },
+      "predicted_shift": {
+        "d_lon": -0.27651881356804897,
+        "d_lat": 2.4905065260765085
+      },
+      "interface": {
+        "auc_friction": 0.5424125,
+        "rho_friction": 0.014889559987135027,
+        "p_friction": 0.044787825588658015,
+        "rho_present": 0.12747353574910805,
+        "n_pos": 169,
+        "n_tot": 18163
+      }
+    },
+    "Canis lupus": {
+      "common": "Grey wolf",
+      "W_shift_km": 421.80746047652275,
+      "frag_present": {
+        "n_patches": 96,
+        "total_persistence": 22.752371325157583,
+        "mean_persistence": 0.12982397549785674,
+        "n_loops": 2066
+      },
+      "frag_future": {
+        "n_patches": 115,
+        "total_persistence": 25.979157785885036,
+        "mean_persistence": 0.12470024419219597,
+        "n_loops": 2213
+      },
+      "topo_change_W1": 7.6752164192922185,
+      "observed_shift": {
+        "d_lon": -2.3195640000000015,
+        "d_lat": -7.639790000000005,
+        "n_past": 7864,
+        "n_recent": 8607
+      },
+      "predicted_shift": {
+        "d_lon": 0.700631268502949,
+        "d_lat": 2.2914522487747675
+      },
+      "interface": {
+        "auc_friction": 0.54081,
+        "rho_friction": 0.03979375389744932,
+        "p_friction": 8.105382883909817e-08,
+        "rho_present": 0.15730179385259724,
+        "n_pos": 1277,
+        "n_tot": 18163
+      }
+    },
+    "Lynx lynx": {
+      "common": "Eurasian lynx",
+      "W_shift_km": 519.3953319251418,
+      "frag_present": {
+        "n_patches": 137,
+        "total_persistence": 25.415592626706985,
+        "mean_persistence": 0.12232081352133048,
+        "n_loops": 2163
+      },
+      "frag_future": {
+        "n_patches": 109,
+        "total_persistence": 19.90362280307672,
+        "mean_persistence": 0.11504690177259254,
+        "n_loops": 2188
+      },
+      "topo_change_W1": 9.32932602049929,
+      "observed_shift": {
+        "d_lon": 4.722960999999998,
+        "d_lat": 3.627634999999998,
+        "n_past": 9796,
+        "n_recent": 9462
+      },
+      "predicted_shift": {
+        "d_lon": 0.468240976190134,
+        "d_lat": 2.856165608462779
+      },
+      "interface": {
+        "auc_friction": 0.51322,
+        "rho_friction": 0.006110307131227861,
+        "p_friction": 0.410258864059122,
+        "rho_present": 0.2092337409675168,
+        "n_pos": 334,
+        "n_tot": 18163
+      }
+    },
+    "Canis aureus": {
+      "common": "Golden jackal",
+      "W_shift_km": 363.7655523534721,
+      "frag_present": {
+        "n_patches": 29,
+        "total_persistence": 8.592127581869136,
+        "mean_persistence": 0.12164326731500955,
+        "n_loops": 1980
+      },
+      "frag_future": {
+        "n_patches": 92,
+        "total_persistence": 20.059799031412695,
+        "mean_persistence": 0.11634477129985538,
+        "n_loops": 2129
+      },
+      "topo_change_W1": 9.216331192732794,
+      "observed_shift": {
+        "d_lon": -4.591618,
+        "d_lat": 0.3622450000000015,
+        "n_past": 95,
+        "n_recent": 2193
+      },
+      "predicted_shift": {
+        "d_lon": -0.029438666516096588,
+        "d_lat": 1.699786544684136
+      },
+      "interface": {
+        "auc_friction": 0.4996275,
+        "rho_friction": -0.0007560767336821344,
+        "p_friction": 0.9188443088018872,
+        "rho_present": 0.15374945613201432,
+        "n_pos": 370,
+        "n_tot": 18163
+      }
+    },
+    "Sus scrofa": {
+      "common": "Wild boar",
+      "W_shift_km": 513.3964924239739,
+      "frag_present": {
+        "n_patches": 160,
+        "total_persistence": 32.90874017425813,
+        "mean_persistence": 0.13073848852072842,
+        "n_loops": 2169
+      },
+      "frag_future": {
+        "n_patches": 199,
+        "total_persistence": 38.57952498897794,
+        "mean_persistence": 0.12542759852446428,
+        "n_loops": 2110
+      },
+      "topo_change_W1": 10.913922570476338,
+      "observed_shift": {
+        "d_lon": -0.12622,
+        "d_lat": 3.3274899999999974,
+        "n_past": 9857,
+        "n_recent": 9623
+      },
+      "predicted_shift": {
+        "d_lon": 0.9803438221244456,
+        "d_lat": 3.0420684755198106
+      },
+      "interface": {
+        "auc_friction": 0.5234125,
+        "rho_friction": 0.024823897796816347,
+        "p_friction": 0.0008204367796803866,
+        "rho_present": 0.29155469752304375,
+        "n_pos": 1703,
+        "n_tot": 18163
+      }
+    },
+    "Capreolus capreolus": {
+      "common": "Roe deer",
+      "W_shift_km": 614.9615130763711,
+      "frag_present": {
+        "n_patches": 182,
+        "total_persistence": 34.755058646223915,
+        "mean_persistence": 0.12230192770372954,
+        "n_loops": 2236
+      },
+      "frag_future": {
+        "n_patches": 134,
+        "total_persistence": 27.43506862965114,
+        "mean_persistence": 0.13557947650829802,
+        "n_loops": 2281
+      },
+      "topo_change_W1": 8.78812689347725,
+      "observed_shift": {
+        "d_lon": 1.2841630000000004,
+        "d_lat": 0.9683109999999999,
+        "n_past": 9899,
+        "n_recent": 9803
+      },
+      "predicted_shift": {
+        "d_lon": 1.8014412861194087,
+        "d_lat": 3.777432329683027
+      },
+      "interface": {
+        "auc_friction": 0.5423825,
+        "rho_friction": 0.044290879374332785,
+        "p_friction": 2.3492497765225867e-09,
+        "rho_present": 0.3490514628176542,
+        "n_pos": 1561,
+        "n_tot": 18163
+      }
+    },
+    "Vulpes vulpes": {
+      "common": "Red fox",
+      "W_shift_km": 499.88423236970857,
+      "frag_present": {
+        "n_patches": 214,
+        "total_persistence": 43.27188684325665,
+        "mean_persistence": 0.13939537558809062,
+        "n_loops": 2207
+      },
+      "frag_future": {
+        "n_patches": 183,
+        "total_persistence": 40.77776063606143,
+        "mean_persistence": 0.1521169288297657,
+        "n_loops": 2208
+      },
+      "topo_change_W1": 9.931132100305634,
+      "observed_shift": {
+        "d_lon": 2.4795500000000006,
+        "d_lat": 1.543717000000001,
+        "n_past": 9864,
+        "n_recent": 9624
+      },
+      "predicted_shift": {
+        "d_lon": 1.3263262192673628,
+        "d_lat": 2.8228091425586586
+      },
+      "interface": {
+        "auc_friction": 0.52354,
+        "rho_friction": 0.025480565626788285,
+        "p_friction": 0.0005939953533919596,
+        "rho_present": 0.31607092996703817,
+        "n_pos": 1923,
+        "n_tot": 18163
+      }
+    }
+  },
+  "community": {
+    "frag_present": {
+      "n_patches": 80,
+      "total_persistence": 17.433975904714316,
+      "mean_persistence": 0.09510209436994047,
+      "n_loops": 2389
+    },
+    "frag_future": {
+      "n_patches": 78,
+      "total_persistence": 17.933619789779186,
+      "mean_persistence": 0.0982842108187003,
+      "n_loops": 2536
+    },
+    "topo_change_W1_H0": 3.6662686293816034,
+    "topo_change_W1_H1": 3.799835013058036,
+    "mean_W_shift_km": 484.3186546808129
+  },
+  "validation_shift": {
+    "pearson": 0.39252247920074507,
+    "spearman": 0.642857142857143,
+    "n": 7
+  }
+}

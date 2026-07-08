@@ -1,0 +1,31 @@
+# --- large data & environments (do NOT commit) ---
+project/data/
+project/.venv/
+.venv/
+
+# raw datasets / caches
+*.zip
+*.tif
+*.tfw
+gHM_extracted/
+
+# course assignment PDF (third-party material) — root level only; keep figure PDFs
+/*.pdf
+
+# stray R history
+.Rhistory
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# os / editor
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# scratch
+scratchpad/
