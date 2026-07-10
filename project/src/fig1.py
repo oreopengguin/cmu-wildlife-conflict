@@ -68,12 +68,16 @@ def panel_b(ax, A):
                           Y[:, 1].min():Y[:, 1].max():80j]
         zz = k(np.vstack([xx.ravel(), yy.ravel()])).reshape(xx.shape)
         ax.contour(xx, yy, zz, levels=[zz.max() * 0.4], colors=[C.SPECIES_COLOR[sp]],
-                   linewidths=1.4, alpha=0.95)
-    # legend proxies
+                   linewidths=1.6, alpha=0.95)
+        # redundant shape encoding: species marker at niche centroid
+        ax.scatter(Yi[:, 0].mean(), Yi[:, 1].mean(), marker=C.SPECIES_MARKER[sp],
+                   s=46, facecolor=C.SPECIES_COLOR[sp], edgecolor="white",
+                   linewidth=0.8, zorder=5)
+    # legend proxies (colour + shape together)
     for sp in FD.species_present(A):
-        ax.plot([], [], color=C.SPECIES_COLOR[sp], lw=1.6,
-                label=C.SPECIES_COMMON[sp])
-    ax.legend(loc="upper left", ncol=1, fontsize=6.3, handlelength=1.2,
+        ax.scatter([], [], color=C.SPECIES_COLOR[sp], marker=C.SPECIES_MARKER[sp],
+                   s=34, label=C.SPECIES_COMMON[sp])
+    ax.legend(loc="upper left", ncol=1, fontsize=6.3, handlelength=1.0,
               borderaxespad=0.2)
     ev = pca.explained_variance_ratio_ * 100
     ax.set_xlabel(f"Climate PC1 ({ev[0]:.0f}%)")
@@ -131,21 +135,24 @@ def panel_d(ax):
     m = FD.load_metrics()
     sps = [sp for sp in C.SPECIES_NAMES if sp in m]
     yy = np.arange(len(sps))[::-1]
-    for metric, off, mk, lab in [("auc", 0.22, "o", "AUC"),
-                                 ("boyce", 0.0, "s", "Boyce"),
-                                 ("tss", -0.22, "D", "TSS")]:
+    # TSS removed: it is threshold-dependent and ill-suited to presence-only
+    # data; we report AUC and the presence-only Boyce index (see CHANGES.md).
+    for metric, off, mk, lab in [("auc", 0.14, "o", "AUC"),
+                                 ("boyce", -0.14, "s", "Boyce index")]:
         vals = [m[sp][metric][0] for sp in sps]
         errs = [m[sp][metric][1] for sp in sps]
-        col = {"auc": "#123a5e", "boyce": "#1f7a7a", "tss": "#d64545"}[metric]
-        ax.errorbar(vals, yy + off, xerr=errs, fmt=mk, ms=4.5, color=col,
+        col = {"auc": "#0072B2", "boyce": "#009E73"}[metric]
+        ax.errorbar(vals, yy + off, xerr=errs, fmt=mk, ms=5.0, color=col,
                     ecolor=FS.to_rgba(col, 0.5), elinewidth=1.0, capsize=2,
                     label=lab, lw=0)
     ax.axvline(0.5, color=FS.FAINT, lw=0.8, ls="--")
+    ax.text(0.5, 0.015, "random", fontsize=6, color=FS.MUTE, ha="center",
+            va="bottom", transform=ax.get_xaxis_transform())
     ax.set_yticks(yy)
     ax.set_yticklabels([C.SPECIES_COMMON[sp] for sp in sps], fontsize=7)
     ax.set_xlabel("Spatial cross-validation skill")
     ax.set_xlim(-0.05, 1.02)
-    ax.legend(loc="lower right", ncol=3, fontsize=6.3, columnspacing=0.8)
+    ax.legend(loc="lower right", ncol=2, fontsize=6.6, columnspacing=0.8)
     ax.set_title("Block-CV performance (mean ± SD, 4 folds)", loc="left")
     ax.spines["left"].set_visible(False)
     ax.tick_params(axis="y", length=0)

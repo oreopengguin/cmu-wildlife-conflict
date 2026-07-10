@@ -1,0 +1,138 @@
+/* ============================================================================
+   game.css — "Escape Room: Save the Wildlife" — matched to the site design.
+   ========================================================================== */
+.game{background:var(--card);border:1px solid var(--line);border-radius:20px;
+  box-shadow:var(--shadow);overflow:hidden;position:relative}
+
+/* progress header */
+.g-progress{padding:20px 24px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ember) 6%,transparent),transparent)}
+.g-progress .g-title{font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ember);margin-bottom:12px;display:flex;
+  justify-content:space-between;align-items:center}
+.g-bar{height:8px;background:var(--card2);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.g-bar > i{display:block;height:100%;width:0;border-radius:8px;
+  background:linear-gradient(90deg,var(--teal),var(--ember));transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.g-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.g-step{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--slate);
+  padding:8px 10px;border-radius:10px;border:1px solid transparent;transition:all .3s}
+.g-step .box{width:18px;height:18px;border-radius:5px;border:2px solid var(--faint);
+  display:grid;place-items:center;font-size:12px;flex:none;transition:all .3s}
+.g-step.done{color:var(--ink);border-color:color-mix(in srgb,var(--good) 40%,transparent);
+  background:color-mix(in srgb,var(--good) 8%,transparent)}
+.g-step.done .box{background:var(--good);border-color:var(--good);color:#fff}
+.g-step.active{border-color:color-mix(in srgb,var(--ember) 45%,transparent)}
+@media(max-width:640px){.g-steps{grid-template-columns:repeat(2,1fr)}}
+
+/* room body */
+.g-body{padding:26px 24px 28px}
+.g-room{animation:g-fade .5s ease}
+@keyframes g-fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.g-room .g-station{font-family:var(--mono);font-size:12px;color:var(--ember);letter-spacing:.06em}
+.g-room h3{margin:6px 0 4px;font-size:23px}
+.g-story{color:var(--slate);font-size:15px;max-width:640px;margin-bottom:18px}
+.g-prompt{font-weight:600;margin-bottom:14px}
+
+/* draggable pipeline cards (room 1) */
+.g-cards{display:flex;flex-direction:column;gap:10px;max-width:440px}
+.g-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;
+  background:var(--card2);border:1px solid var(--line);cursor:grab;user-select:none;
+  font-weight:600;transition:transform .16s ease, box-shadow .16s ease, border-color .2s}
+.g-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.g-card.dragging{opacity:.6;cursor:grabbing;transform:scale(1.03);box-shadow:0 12px 30px rgba(0,0,0,.2)}
+.g-card.snap{animation:g-snap .4s ease}
+@keyframes g-snap{0%{transform:scale(1.05)}60%{transform:scale(.97)}100%{transform:scale(1)}}
+.g-card .h{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+  background:var(--paper);font-size:15px;flex:none}
+.g-card .ord{margin-left:auto;font-family:var(--mono);color:var(--slate);font-size:12px}
+.g-card.correct{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,transparent)}
+.g-arrows{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+
+/* choice buttons (rooms 2 & 3) */
+.g-choices{display:grid;gap:12px}
+.g-choices.dir{grid-template-columns:repeat(2,minmax(0,180px));justify-content:start}
+.g-choices.multi{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));max-width:560px}
+.g-choice{padding:16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);
+  cursor:pointer;font-weight:600;font-size:15px;display:flex;align-items:center;gap:10px;
+  transition:transform .14s ease, border-color .2s, background .2s}
+.g-choice:hover{transform:translateY(-2px);border-color:var(--ink)}
+.g-choice .ic{font-size:22px}
+.g-choice[aria-pressed="true"]{border-color:var(--sky);background:color-mix(in srgb,var(--sky) 12%,transparent)}
+.g-choice.correct{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.g-choice.wrong{animation:g-shake .4s}
+@keyframes g-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+/* risk-map click (room 4) */
+.g-map{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  max-width:520px;background:var(--card2);cursor:crosshair;aspect-ratio:468/342}
+.g-map img{width:100%;display:block}
+.g-hot{position:absolute;width:34px;height:34px;border-radius:50%;transform:translate(-50%,-50%);
+  border:2.5px solid var(--good);box-shadow:0 0 0 4px color-mix(in srgb,var(--good) 30%,transparent),0 0 16px var(--good);
+  animation:g-pulse 1.4s infinite;pointer-events:none}
+@keyframes g-pulse{0%{box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 40%,transparent),0 0 10px var(--good)}
+  50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--good) 12%,transparent),0 0 22px var(--good)}
+  100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 40%,transparent),0 0 10px var(--good)}}
+.g-miss{position:absolute;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);
+  background:var(--bad);opacity:.5;pointer-events:none;animation:g-fade .3s}
+.g-maplabel{position:absolute;transform:translate(-50%,-140%);font-size:11px;font-weight:700;
+  color:#fff;background:rgba(10,15,25,.7);padding:2px 7px;border-radius:10px;pointer-events:none;white-space:nowrap}
+
+/* feedback + controls */
+.g-feedback{margin-top:16px;padding:14px 16px;border-radius:12px;font-size:14px;
+  border:1px solid var(--line);background:var(--card2);display:none}
+.g-feedback.show{display:block;animation:g-fade .4s}
+.g-feedback.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 9%,transparent)}
+.g-feedback.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.g-feedback b{color:var(--ink)}
+.g-controls{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
+.g-btn{padding:10px 18px;border-radius:22px;border:1px solid var(--line);background:var(--card2);
+  color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;transition:transform .14s, box-shadow .14s}
+.g-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.g-btn.primary{background:linear-gradient(135deg,var(--ember),#8c2d62);color:#fff;border:none}
+.g-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.g-hintbox{margin-top:10px;font-size:13px;color:var(--slate);font-style:italic;display:none}
+.g-hintbox.show{display:block;animation:g-fade .3s}
+
+/* keys tray + notebook */
+.g-side{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;align-items:flex-start}
+.g-keys{display:flex;gap:8px}
+.g-key{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:18px;
+  border:1px dashed var(--faint);color:var(--faint);transition:all .4s}
+.g-key.have{border-style:solid;border-color:var(--gold);color:var(--gold);
+  background:color-mix(in srgb,var(--gold) 12%,transparent);animation:g-sparkle .7s}
+@keyframes g-sparkle{0%{transform:scale(.4) rotate(-20deg);opacity:0}
+  60%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.g-notebook{flex:1;min-width:240px;background:var(--card2);border:1px solid var(--line);
+  border-radius:12px;padding:14px 16px}
+.g-notebook h5{margin:0 0 8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ember)}
+.g-notebook ul{margin:0;padding-left:18px;font-size:13px;color:var(--slate)}
+.g-notebook li{margin-bottom:6px;animation:g-fade .5s}
+
+/* final screen */
+.g-final{text-align:center;padding:36px 24px}
+.g-lock{font-size:60px;margin-bottom:10px;display:inline-block}
+.g-final h3{font-size:34px;margin:8px 0}
+.g-final .sub{color:var(--slate);max-width:520px;margin:0 auto 22px}
+.g-badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;
+  max-width:720px;margin:0 auto 24px}
+.g-badge{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:18px;
+  animation:g-badge .6s backwards}
+.g-badge .em{font-size:30px}
+.g-badge h5{margin:8px 0 4px;font-size:15px;font-family:var(--sans)}
+.g-badge p{font-size:12.5px;color:var(--slate);margin:0}
+@keyframes g-badge{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:none}}
+.g-score{font-size:15px;margin:8px 0 4px}
+.g-stars{font-size:26px;letter-spacing:3px;color:var(--gold)}
+
+/* door reveal overlay */
+.g-door{position:absolute;inset:0;z-index:5;display:grid;place-items:center;pointer-events:none}
+.g-door .leaf{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(180deg,var(--card),var(--card2));
+  border-right:1px solid var(--line);transition:transform 1s cubic-bezier(.7,0,.3,1)}
+.g-door .leaf.l{left:0}.g-door .leaf.r{right:0;border-right:none;border-left:1px solid var(--line)}
+.g-door.open .leaf.l{transform:translateX(-100%)}
+.g-door.open .leaf.r{transform:translateX(100%)}
+.g-flykey{position:absolute;font-size:26px;z-index:6;transition:all .9s cubic-bezier(.5,0,.4,1);pointer-events:none}
+
+/* confetti */
+.g-confetti{position:absolute;width:9px;height:14px;top:-20px;z-index:7;pointer-events:none;border-radius:2px}

@@ -1,0 +1,82 @@
+{
+ "species": [
+  {
+   "key": "Ursus arctos",
+   "common": "Brown bear",
+   "color": "#E69F00",
+   "marker": "o",
+   "W_km": 457,
+   "pred_dlat": 2.49,
+   "obs_dlat": -0.51
+  },
+  {
+   "key": "Canis lupus",
+   "common": "Grey wolf",
+   "color": "#CC79A7",
+   "marker": "s",
+   "W_km": 422,
+   "pred_dlat": 2.29,
+   "obs_dlat": -7.64
+  },
+  {
+   "key": "Lynx lynx",
+   "common": "Eurasian lynx",
+   "color": "#009E73",
+   "marker": "^",
+   "W_km": 519,
+   "pred_dlat": 2.86,
+   "obs_dlat": 3.63
+  },
+  {
+   "key": "Canis aureus",
+   "common": "Golden jackal",
+   "color": "#E6C200",
+   "marker": "D",
+   "W_km": 364,
+   "pred_dlat": 1.7,
+   "obs_dlat": 0.36
+  },
+  {
+   "key": "Sus scrofa",
+   "common": "Wild boar",
+   "color": "#0072B2",
+   "marker": "P",
+   "W_km": 513,
+   "pred_dlat": 3.04,
+   "obs_dlat": 3.33
+  },
+  {
+   "key": "Capreolus capreolus",
+   "common": "Roe deer",
+   "color": "#56B4E9",
+   "marker": "v",
+   "W_km": 615,
+   "pred_dlat": 3.78,
+   "obs_dlat": 0.97
+  },
+  {
+   "key": "Vulpes vulpes",
+   "common": "Red fox",
+   "color": "#D55E00",
+   "marker": "X",
+   "W_km": 500,
+   "pred_dlat": 2.82,
+   "obs_dlat": 1.54
+  }
+ ],
+ "scenario": "SSP2-4.5 (2081-2100)",
+ "results": {
+  "n_species": 7,
+  "mean_shift_km": 484,
+  "spearman": 0.64,
+  "pearson": 0.39,
+  "warming_C": 2.8,
+  "frag_H1_present": 2389,
+  "frag_H1_future": 2536,
+  "scenario_corr": 0.98,
+  "maxent_check": 0.9999840887596868,
+  "grid_cv_pct": 0.5,
+  "W245_mean": 484,
+  "W585_mean": 714
+ }
+}

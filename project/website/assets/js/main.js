@@ -1,0 +1,87 @@
+/* ============================================================================
+   main.js — theme toggle, animated hero field, scroll-reveal, small helpers.
+   Vanilla JS, no dependencies.
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  /* ---------- theme toggle (persisted) ---------- */
+  const root = document.documentElement;
+  const saved = localStorage.getItem("goc-theme");
+  if (saved) root.setAttribute("data-theme", saved);
+  const btn = document.getElementById("themeBtn");
+  if (btn) btn.addEventListener("click", function () {
+    const cur = root.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    localStorage.setItem("goc-theme", next);
+    window.dispatchEvent(new CustomEvent("themechange"));
+  });
+
+  /* ---------- animated "poleward displacement" hero field ---------- */
+  const c = document.getElementById("field");
+  if (c) {
+    const ctx = c.getContext("2d");
+    let W, H, parts = [];
+    const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+    function inkRGBA() {
+      const d = root.getAttribute("data-theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+      return d === "dark" ? "rgba(224,122,74," : "rgba(200,90,43,";
+    }
+    function size() {
+      W = c.width = c.offsetWidth; H = c.height = c.offsetHeight;
+      parts = [];
+      const n = Math.min(150, Math.floor(W * H / 9000));
+      for (let i = 0; i < n; i++)
+        parts.push({ x: Math.random() * W, y: Math.random() * H,
+          s: 0.2 + Math.random() * 0.7, len: 8 + Math.random() * 22 });
+    }
+    function step() {
+      ctx.clearRect(0, 0, W, H);
+      const col = inkRGBA();
+      for (const p of parts) {
+        const vx = Math.sin((p.y + p.x) * 0.004) * 0.35, vy = -(0.5 + p.s);
+        ctx.strokeStyle = col + (0.10 + p.s * 0.18) + ")";
+        ctx.lineWidth = p.s * 1.1;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p.x - vx * p.len, p.y - vy * p.len * 0.1 + p.len);
+        ctx.stroke();
+        p.x += vx; p.y += vy;
+        if (p.y < -20) { p.y = H + 10; p.x = Math.random() * W; }
+        if (p.x < 0) p.x += W; if (p.x > W) p.x -= W;
+      }
+      if (!reduce) requestAnimationFrame(step);
+    }
+    size(); window.addEventListener("resize", size);
+    step();
+  }
+
+  /* ---------- scroll reveal ---------- */
+  const io = new IntersectionObserver(function (entries) {
+    for (const e of entries) if (e.isIntersecting) {
+      e.target.classList.add("in"); io.unobserve(e.target);
+    }
+  }, { threshold: 0.08 });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+  /* ---------- shared tooltip helper (exposed globally) ---------- */
+  const tip = document.getElementById("tooltip");
+  window.GOC = window.GOC || {};
+  window.GOC.tip = {
+    show(html, x, y) {
+      tip.innerHTML = html;
+      tip.style.opacity = "1";
+      const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+      let left = x + pad, top = y + pad;
+      if (left + w > innerWidth) left = x - w - pad;
+      if (top + h > innerHeight) top = y - h - pad;
+      tip.style.left = left + "px"; tip.style.top = top + "px";
+    },
+    hide() { tip.style.opacity = "0"; }
+  };
+  window.GOC.cssVar = name =>
+    getComputedStyle(root).getPropertyValue(name).trim();
+})();

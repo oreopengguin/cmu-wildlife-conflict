@@ -33,15 +33,24 @@ GRID_RES = 1.0 / 6.0            # ~18 km at the equator
 # Species: conflict-prone European large/meso mammals with dense GBIF records
 # and active range dynamics. Keys are GBIF usageKeys resolved at download time.
 # ----------------------------------------------------------------------------
+# Colours: Okabe-Ito colourblind-safe qualitative palette (distinguishable
+# under deuteranopia/protanopia/tritanopia). Paired with redundant marker
+# shapes in figures so colour is never the sole channel.
 SPECIES = [
-    ("Ursus arctos",        "Brown bear",     "#8c510a"),
-    ("Canis lupus",         "Grey wolf",      "#762a83"),
-    ("Lynx lynx",           "Eurasian lynx",  "#1b7837"),
-    ("Canis aureus",        "Golden jackal",  "#d6604d"),
-    ("Sus scrofa",          "Wild boar",      "#e08214"),
-    ("Capreolus capreolus", "Roe deer",       "#4393c3"),
-    ("Vulpes vulpes",       "Red fox",        "#b2182b"),
+    ("Ursus arctos",        "Brown bear",     "#E69F00"),  # orange
+    ("Canis lupus",         "Grey wolf",      "#CC79A7"),  # reddish purple
+    ("Lynx lynx",           "Eurasian lynx",  "#009E73"),  # bluish green
+    ("Canis aureus",        "Golden jackal",  "#E6C200"),  # gold
+    ("Sus scrofa",          "Wild boar",      "#0072B2"),  # blue
+    ("Capreolus capreolus", "Roe deer",       "#56B4E9"),  # sky blue
+    ("Vulpes vulpes",       "Red fox",        "#D55E00"),  # vermilion
 ]
+# Redundant marker per species (shape encoding, colourblind backup)
+SPECIES_MARKER = {
+    "Ursus arctos": "o", "Canis lupus": "s", "Lynx lynx": "^",
+    "Canis aureus": "D", "Sus scrofa": "P", "Capreolus capreolus": "v",
+    "Vulpes vulpes": "X",
+}
 SPECIES_NAMES = [s[0] for s in SPECIES]
 SPECIES_COMMON = {s[0]: s[1] for s in SPECIES}
 SPECIES_COLOR = {s[0]: s[2] for s in SPECIES}

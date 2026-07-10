@@ -1,0 +1,100 @@
+[
+ {
+  "key": "Ursus arctos",
+  "common": "Brown bear",
+  "color": "#E69F00",
+  "marker": "o",
+  "auc": [
+   0.852,
+   0.016
+  ],
+  "boyce": [
+   0.915,
+   0.077
+  ]
+ },
+ {
+  "key": "Canis lupus",
+  "common": "Grey wolf",
+  "color": "#CC79A7",
+  "marker": "s",
+  "auc": [
+   0.804,
+   0.076
+  ],
+  "boyce": [
+   0.827,
+   0.201
+  ]
+ },
+ {
+  "key": "Lynx lynx",
+  "common": "Eurasian lynx",
+  "color": "#009E73",
+  "marker": "^",
+  "auc": [
+   0.877,
+   0.012
+  ],
+  "boyce": [
+   0.986,
+   0.011
+  ]
+ },
+ {
+  "key": "Canis aureus",
+  "common": "Golden jackal",
+  "color": "#E6C200",
+  "marker": "D",
+  "auc": [
+   0.923,
+   0.041
+  ],
+  "boyce": [
+   0.917,
+   0.047
+  ]
+ },
+ {
+  "key": "Sus scrofa",
+  "common": "Wild boar",
+  "color": "#0072B2",
+  "marker": "P",
+  "auc": [
+   0.814,
+   0.028
+  ],
+  "boyce": [
+   0.952,
+   0.052
+  ]
+ },
+ {
+  "key": "Capreolus capreolus",
+  "common": "Roe deer",
+  "color": "#56B4E9",
+  "marker": "v",
+  "auc": [
+   0.827,
+   0.029
+  ],
+  "boyce": [
+   0.973,
+   0.029
+  ]
+ },
+ {
+  "key": "Vulpes vulpes",
+  "common": "Red fox",
+  "color": "#D55E00",
+  "marker": "X",
+  "auc": [
+   0.763,
+   0.019
+  ],
+  "boyce": [
+   0.987,
+   0.015
+  ]
+ }
+]

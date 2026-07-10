@@ -118,8 +118,14 @@ def panel_c(ax, A):
         for i in range(len(bins) - 1):
             sel = (xx >= bins[i]) & (xx < bins[i + 1])
             med.append(np.median(yy[sel]) if sel.sum() > 20 else np.nan)
-        ax.plot(ctr, med, color=C.SPECIES_COLOR[sp], lw=1.6, alpha=0.9,
+        med = np.array(med)
+        ax.plot(ctr, med, color=C.SPECIES_COLOR[sp], lw=1.7, alpha=0.9,
                 solid_capstyle="round")
+        # redundant shape markers every few bins (colourblind backup)
+        vis = np.isfinite(med)
+        ax.plot(ctr[vis][::2], med[vis][::2], linestyle="none",
+                marker=C.SPECIES_MARKER[sp], ms=4.5, mfc=C.SPECIES_COLOR[sp],
+                mec="white", mew=0.5, alpha=0.95)
     FS.cbar(ax.figure, hb, ax, "cells (log)")
     ax.set_xlabel("Latitude (°N)")
     ax.set_ylabel("Required range shift (km)")
