@@ -318,5 +318,20 @@ for key, tok in [("figure1_framework", "__FIG1__"), ("figure2_transport", "__FIG
                  ("figureS1_robustness", "__FIGS1__")]:
     HTML = HTML.replace(tok, FIGS[key])
 
-(OUT / "index.html").write_text(HTML)
-print("wrote", OUT / "index.html", round(len(HTML)/1024), "KB")
+# wrap as a complete standalone HTML document (title + favicon) for static hosting
+FAVICON = ("data:image/svg+xml,"
+           "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>"
+           "<text y='.9em' font-size='90'>%F0%9F%90%BA</text></svg>")  # 🐺
+DOC = (
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
+    "<meta charset=\"utf-8\">\n"
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+    "<title>The Geometry of Coexistence</title>\n"
+    "<meta name=\"description\" content=\"Predicting human–wildlife conflict "
+    "from the geometry of climate-forced range shifts.\">\n"
+    f"<link rel=\"icon\" href=\"{FAVICON}\">\n"
+    "</head>\n<body>\n" + HTML + "\n</body>\n</html>\n"
+)
+
+(OUT / "index.html").write_text(DOC)
+print("wrote", OUT / "index.html", round(len(DOC)/1024), "KB")
