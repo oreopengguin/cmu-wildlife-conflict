@@ -368,8 +368,12 @@ retired (the old `gh-pages` branch was deleted).
                                      website/index.html + assets/js/*  ──► Vercel
 ```
 **To refresh site data after a science change: re-run the affected `figN.py` → then
-`export_web.py` → commit → push.** `export_web.py` reads ONLY committed `results/*`, so the
-website can never silently diverge from the science.
+`export_web.py` → commit → push.** `export_web.py` reads the committed `results/*` **plus**
+`data/processed/dataset.npz` (the niche-PCA panel needs the standardized predictors).
+⚠ **`dataset.npz` is gitignored**, so on a *fresh clone* you must regenerate it first
+(download data → `build_covariates.py`) before `export_web.py` will run — it is a
+deterministic product, and the website's numbers still trace to the committed `results/*`.
+Locally on this machine `dataset.npz` already exists, so `export_web.py` runs directly.
 
 **Local preview & inspection loop:** `.claude/launch.json` defines a launch config
 **named `coexistence-site`** (pass this name to `preview_start`) that runs
@@ -492,6 +496,7 @@ introduced**. Every room fully tested end-to-end via preview_eval.
 | SDM maps render nearly all-dark | cloglog suitability concentrated at low values | Per-species 98th-pct contrast stretch (already applied; labelled "relative suitability") |
 | A `→`/`⇄` glyph renders as a box in a figure | Font lacks the glyph | Use mathtext (`$\rightarrow$`) or ASCII in matplotlib text |
 | Website shows old content after push | Vercel cache / not yet redeployed | Wait ~30–60 s; `curl` the URL; hard-refresh |
+| `export_web.py` fails on a fresh clone (`dataset.npz` not found) | It reads gitignored `data/processed/dataset.npz` (niche PCA) | Regenerate it first: download data (§4) → `build_covariates.py` |
 | Figure colours look wrong for a colourblind reviewer | — | Palette is Okabe-Ito + shape markers already; keep both channels (see `docs/CHANGES.md`) |
 
 ## 14. ROADMAP — what's done, what's open, what's next
