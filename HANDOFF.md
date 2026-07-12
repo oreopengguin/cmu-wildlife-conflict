@@ -15,6 +15,27 @@ ran the verifications in §2/§5/§7 successfully.
 
 ---
 
+## −1. 60-SECOND QUICK START (run this first)
+
+```bash
+cd /Users/zacharyzhang/cmu-final-project
+bash verify.sh          # executable health check: env, data, site, git hygiene, reproducibility
+```
+If it prints **"Environment is healthy"** (35/35), you can edit/regenerate/deploy with
+confidence. If any line shows ✗, read it and the matching section below. `verify.sh` is the
+fastest way to know the project is in a workable state without reading everything.
+
+**The three commands you'll use most:**
+```bash
+# 1. run a pipeline script / regenerate a figure (ALWAYS from src, with the venv):
+cd project/src && ../.venv/bin/python figSDM.py
+# 2. refresh website data+images after any science/figure change:
+cd project/src && ../.venv/bin/python export_web.py
+# 3. commit + deploy (NO co-author trailer; Vercel auto-redeploys):
+cd /Users/zacharyzhang/cmu-final-project && export PATH="/opt/homebrew/bin:$PATH" GH_CONFIG_DIR=~/.ghconfig
+git add -A && git commit -m "..." && git push origin main
+```
+
 ## 0. TL;DR
 
 This is a CMU Pre-College Computational Biology **final project** (Topic 25: *"How can we
@@ -202,6 +223,23 @@ All open, no institutional login, all downloadable from the terminal. Cached in
 - **Global Human Modification (gHM)** (figshare article 7283087, `gHM.zip`, 415 MB, global
   1 km, World Mollweide ESRI:54009). Reprojected/decimated to the grid in `io_utils.read_ghm`.
 
+### Exact cold-download commands (if `data/raw/` is empty)
+```bash
+cd project/data/raw
+# WorldClim present + two futures:
+curl -sO "https://geodata.ucdavis.edu/climate/worldclim/2_1/base/wc2.1_10m_bio.zip"
+curl -sO "https://geodata.ucdavis.edu/cmip6/10m/MPI-ESM1-2-HR/ssp245/wc2.1_10m_bioc_MPI-ESM1-2-HR_ssp245_2081-2100.tif"
+curl -sO "https://geodata.ucdavis.edu/cmip6/10m/MPI-ESM1-2-HR/ssp585/wc2.1_10m_bioc_MPI-ESM1-2-HR_ssp585_2081-2100.tif"
+# Global Human Modification (figshare) + unzip:
+curl -sL -o gHM.zip "https://ndownloader.figshare.com/files/13448294" && unzip -o gHM.zip -d gHM_extracted
+# GBIF occurrences (recent + historical) via the project scripts:
+cd ../../src && ../.venv/bin/python download_gbif.py && ../.venv/bin/python download_hist.py
+```
+**Expected artifacts** (sanity of a complete download): `wc2.1_10m_bio.zip` (~48 MB), each
+future `.tif` (~33 MB), `gHM.zip` (~415 MB), and **8 `occ_*.csv` + 7 `occ_hist_*.csv`**
+(each recent species ≈8–10k rows; golden jackal fewer; `occ_ALL.csv` ≈58k rows). After
+downloads, run the full pipeline: `cd project && ./run_pipeline.sh`.
+
 ---
 
 ## 5. Pipeline — modules & run order
@@ -310,9 +348,28 @@ retired (the old `gh-pages` branch was deleted).
   for hover, base64), `risk_grid.json` (coarse CRI).
 - `assets/img/` — figure JPGs, `risk_map.png` (clean CRI map for the game), `sdm/*.png`.
 
-**Data flow:** pipeline → `results/*` → `export_web.py` → `website/assets/{data,img}` →
-JS fetches at runtime. **To refresh site data after a science change: re-run figs →
-`export_web.py` → commit → push.**
+**Data flow (end to end):**
+```
+ data/raw/ (GBIF, WorldClim, gHM)          [downloaded, gitignored]
+      │  build_covariates.py
+      ▼
+ data/processed/dataset.npz                [model-ready arrays, gitignored]
+      │  run_sdm.py (MaxEnt/PPP + spatial CV)
+      ▼
+ results/sdm.npz, sdm_metrics.json
+      │  analysis.py (transport → connectivity → topology → risk) + robustness.py
+      ▼
+ results/analysis.npz, summary.json, robustness.json   ← SOURCE OF TRUTH (committed)
+      │  figN.py / figS1.py / figSDM.py        │  export_web.py
+      ▼                                        ▼
+ figures/*.png,*.pdf  ──►  figures/web/*.jpg   website/assets/data/*.json + assets/img/*
+                                               │  (JS fetch() at runtime)
+                                               ▼
+                                     website/index.html + assets/js/*  ──► Vercel
+```
+**To refresh site data after a science change: re-run the affected `figN.py` → then
+`export_web.py` → commit → push.** `export_web.py` reads ONLY committed `results/*`, so the
+website can never silently diverge from the science.
 
 **Local preview & inspection loop:** `.claude/launch.json` defines a launch config
 **named `coexistence-site`** (pass this name to `preview_start`) that runs
@@ -421,10 +478,52 @@ introduced**. Every room fully tested end-to-end via preview_eval.
 
 ---
 
-## 13. MAINTENANCE CHECKLIST (do this for every future change)
+## 13. TROUBLESHOOTING (symptom → cause → fix)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `no such file or directory: .venv/bin/python` | Running from repo root; venv is under `project/` | `cd project/src && ../.venv/bin/python …` |
+| `numpy.core.multiarray failed to import` / pandas import crash | Using system/Anaconda Python (numpy 2.x vs precompiled pandas) | Use `project/.venv/bin/python` only |
+| `gh: ... mkdir /Users/…/.config/gh: permission denied` or "not logged in" | `~/.config` is root-owned | `export GH_CONFIG_DIR=~/.ghconfig` (+ `PATH=/opt/homebrew/bin`); token already stored there |
+| GBIF download stalls ~offset 9000–10000 | GBIF deep-pagination cliff (>10k offset ≈12 s/page) | Keep `GBIF_MAX_RECORDS=9900`; don't raise it |
+| GBIF "Expecting ':' delimiter" JSON errors | GBIF intermittently truncates responses | Fetcher already retries; use small pages (limit 100) + throttle |
+| OT gives huge/**southward** shifts (e.g. −55°, W≈0) | Wrong OT method (convolutional or `sinkhorn_stabilized`) | Use coarse-grid `ot.sinkhorn` (reg≈0.02, cf=5) as in `transport.py` — do NOT change it |
+| Validation shift correlation is only moderate (ρ≈0.64) | Real — wolf recolonization confound + opportunistic GBIF | This is correct/honest; keep the wolf outlier visible, do not "fix" it |
+| SDM maps render nearly all-dark | cloglog suitability concentrated at low values | Per-species 98th-pct contrast stretch (already applied; labelled "relative suitability") |
+| A `→`/`⇄` glyph renders as a box in a figure | Font lacks the glyph | Use mathtext (`$\rightarrow$`) or ASCII in matplotlib text |
+| Website shows old content after push | Vercel cache / not yet redeployed | Wait ~30–60 s; `curl` the URL; hard-refresh |
+| Figure colours look wrong for a colourblind reviewer | — | Palette is Okabe-Ito + shape markers already; keep both channels (see `docs/CHANGES.md`) |
+
+## 14. ROADMAP — what's done, what's open, what's next
+
+**Done & shipped:** full pipeline; 6 figures; manuscript; interactive website + escape-room
+game on Vercel; two one-pagers; lit review; research plan; CHANGES log; this handoff +
+`verify.sh`.
+
+**Deliberately NOT done (open decisions a successor may take up):**
+- The manuscript is a Markdown draft; it has **not** been typeset (LaTeX/Word) or submitted.
+  Honest venue framing = strong computational-ecology *methods* paper (Methods in Ecology &
+  Evolution / Ecography), not a guaranteed Nature paper. Don't oversell it.
+- Only one climate model (MPI-ESM1-2-HR) is used; a **multi-GCM ensemble** would strengthen
+  robustness (currently only 2 SSP scenarios of one GCM).
+- Resolution is coarse (~18 km). A **fine-resolution downscale** to one region is listed as a
+  future-research idea (see the `FRONTIERS[]` array in `website/assets/js/charts.js`).
+- The 6 **future-research ideas** on the site are proposals, not implemented.
+- No independent **conflict dataset** was found that's openly downloadable + pan-European; the
+  friction→interface test uses occurrence-in-human-cells as the interface proxy. A real
+  conflict dataset would be the strongest possible Validation 2 upgrade.
+
+**If asked to "extend the science":** the cleanest high-value next steps are (a) a multi-GCM
+ensemble mean of the friction field, (b) Gromov–Wasserstein coupled predator–prey transport,
+or (c) implementing the "inverse transport / stepping-stone reserve placement" frontier idea.
+All fit the existing `transport.py` machinery.
+
+## 15. MAINTENANCE CHECKLIST (do this for every future change)
 1. Make the change; keep everything grounded in real pipeline output.
 2. If figures/results/presentation changed → update `project/docs/CHANGES.md`.
 3. If the site data/images are affected → re-run `export_web.py`.
 4. Preview locally (both themes + mobile), critique, fix.
-5. Commit **without** a `Co-Authored-By` trailer; push to `main`; confirm Vercel redeployed.
-6. **Update THIS file (`HANDOFF.md`)** — the status line, and any new files/decisions/gotchas.
+5. **Run `bash verify.sh` — it must print 0 failed** before you commit.
+6. Commit **without** a `Co-Authored-By` trailer; push to `main`; confirm Vercel redeployed.
+7. **Update THIS file (`HANDOFF.md`)** — the status line, any new files/decisions/gotchas —
+   and extend `verify.sh` if you added assets it should check.
