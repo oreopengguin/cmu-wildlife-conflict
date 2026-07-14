@@ -35,7 +35,7 @@
     "Habitat models (MaxEnt) are built from <b>climate data</b> and species sightings.",
     "Warming pushes European species <b>~484 km north</b> on average by 2090.",
     "Conflict concentrates where wildlife moves into <b>farmland and cities</b> (high human modification).",
-    "The risk map flags hotspots — Alps, Carpathians, S. Scandinavia — <b>without using any historical conflict data</b>."
+    "The risk map flags hotspots — the <b>Alps</b>, the <b>Poland–Belarus lowlands</b>, and the <b>north-eastern Baltic</b> — <b>without using any historical conflict data</b>."
   ];
 
   /* ---------- varied wrong-answer feedback ----------------------------------
@@ -56,19 +56,37 @@
     if (wrongPtr >= wrongSeq.length) { wrongSeq = shuffle(WRONG_MSGS); wrongPtr = 0; }
     return wrongSeq[wrongPtr++];
   }
+  /* "already found" pool (Room 4) — neutral, not counted as a wrong answer */
+  const ALREADY_MSGS = [
+    "You've already found that one — try another cluster.",
+    "Already flagged — look for a different hotspot.",
+    "That spot's already marked. Find another.",
+    "Already discovered — hunt down the other bright areas.",
+    "Yep, that one's on the board — pick a new region.",
+    "Already found it — seek the remaining hotspots.",
+    "Been there! Try a different bright cluster."
+  ];
+  let alreadySeq = shuffle(ALREADY_MSGS), alreadyPtr = 0;
+  function nextAlreadyMsg() {
+    if (alreadyPtr >= alreadySeq.length) { alreadySeq = shuffle(ALREADY_MSGS); alreadyPtr = 0; }
+    return alreadySeq[alreadyPtr++];
+  }
   /* small inline indicator that lives next to the action / check button */
   function inlineFb() { return h("span", { class: "g-inline-fb", id: "gInlineFb",
     role: "status", "aria-live": "assertive" }, []); }
-  function showWrong() {
+  function inlineMsg(msg, kind) {           // kind: "wrong" (red ✕, counts) | "info" (amber ℹ, neutral)
+    if (kind !== "info") { state.wrong++; save(); }
     const box = document.getElementById("gInlineFb");
-    state.wrong++; save();
     if (!box) return;
-    box.innerHTML = `<span class="x" aria-hidden="true">✕</span><span class="msg">${nextWrongMsg()}</span>`;
-    box.classList.remove("show"); void box.offsetWidth; box.classList.add("show"); // re-trigger anim
+    box.className = "g-inline-fb" + (kind === "info" ? " info" : "");
+    box.innerHTML = `<span class="x" aria-hidden="true">${kind === "info" ? "ℹ" : "✕"}</span><span class="msg">${msg}</span>`;
+    void box.offsetWidth; box.classList.add("show");   // re-trigger the pop animation
   }
+  function showWrong() { inlineMsg(nextWrongMsg(), "wrong"); }
+  function showAlready() { inlineMsg(nextAlreadyMsg(), "info"); }
   function clearWrong() {
     const box = document.getElementById("gInlineFb");
-    if (box) { box.classList.remove("show"); box.innerHTML = ""; }
+    if (box) { box.className = "g-inline-fb"; box.innerHTML = ""; }
   }
 
   /* ---------- shell ---------- */
@@ -133,11 +151,12 @@
   function feedback(msg, ok) {
     let fb = document.getElementById("gFb");
     if (!fb) return;
-    fb.className = "g-feedback show " + (ok ? "ok" : "no");
+    fb.className = "g-feedback show " + (ok === true ? "ok" : ok === "info" ? "info" : "no");
     fb.innerHTML = msg;
   }
 
   function awardKey(roomIdx) {
+    if (state.solved[roomIdx]) return;         // idempotent — never double-award or double-log a note
     state.solved[roomIdx] = true;
     state.keys = state.solved.filter(Boolean).length;
     if (!state.notes.includes(NOTES[roomIdx])) state.notes.push(NOTES[roomIdx]);
@@ -370,6 +389,7 @@
     stage.innerHTML = "";
     const opts = [["🌲", "Forest", false], ["🌾", "Farmland", true], ["🏔", "Mountains", false], ["🏙", "City", true]];
     const picked = new Set();
+    let locked = false;
     const grid = h("div", { class: "g-choices multi" });
     opts.forEach(([ic, name]) => {
       const b = h("button", { class: "g-choice", "aria-pressed": "false" }, [
@@ -389,10 +409,11 @@
       grid,
       h("div", { class: "g-controls" }, [
         h("button", { class: "g-btn primary", onclick: () => {
+          if (locked) return;
           const want = new Set(["Farmland", "City"]);
           const ok = picked.size === want.size && [...want].every(x => picked.has(x));
           if (ok) {
-            clearWrong();
+            locked = true; clearWrong();
             grid.querySelectorAll(".g-choice").forEach(b => {
               const n = b.textContent.trim(); if (want.has(n)) b.classList.add("correct");
             });
@@ -414,52 +435,62 @@
 
   /* ============================ ROOM 4 ============================ */
   const EXTENT = [-12, 40, 34, 72]; // lonmin, lonmax, latmin, latmax
-  const HOTSPOTS = [
-    { name: "Alps", lon: 10.5, lat: 46.4 },
-    { name: "Carpathians", lon: 24.5, lat: 47.8 },
-    { name: "S. Scandinavia", lon: 13.5, lat: 59.0 }
+  // Accept-regions = the three genuinely bright clusters on the committed CRI map
+  // (verified against results/analysis.npz). Boxes are generous so a click anywhere
+  // in the area counts; the centre is only used for labels.
+  const REGIONS = [
+    { name: "Alps",                box: [5.5, 15, 44.5, 48] },
+    { name: "NE Baltic",           box: [23, 33, 57.5, 61.5] },
+    { name: "Poland–Belarus belt", box: [16, 32, 50.5, 56.5] }
   ];
+  const SCOTLAND = [-8, -1.5, 55, 59.5];  // the over-water optimal-transport friction artefact
+  const SCOTLAND_MSGS = [
+    "That's <b>Scotland</b> — a trap. The model piles <b>artificial friction</b> here because it assumes any animal leaving the island must travel huge distances across open sea. In reality (Figure 2a) Scotland's habitat barely gains or loses, so its brightness is an <b>artefact</b>, not a real hotspot. Try the mainland clusters.",
+    "<b>Scotland again.</b> Its glow is an <b>over-water artefact</b>: shifting habitat off an island costs the transport step enormous distance, which inflates friction even though the actual habitat change there is minimal (Figure 2a). Look to the mainland.",
+    "Careful — <b>Scotland</b> looks bright but shouldn't be picked. The model thinks its wildlife must cross the ocean to move, so it adds <b>false friction</b>; the real habitat gain or loss there is tiny (Figure 2a). Aim for the Alps, the Poland–Belarus belt, or the north-eastern Baltic."
+  ];
+  let scotPtr = 0;
+  const nextScotlandMsg = () => SCOTLAND_MSGS[scotPtr++ % SCOTLAND_MSGS.length];
+
   function room4() {
     stage.innerHTML = "";
     const found = new Set();
-    const map = h("div", { class: "g-map", id: "gMap", role: "img", "aria-label": "Coexistence risk map — click three predicted hotspots" }, [
+    const map = h("div", { class: "g-map", id: "gMap", role: "img", "aria-label": "Coexistence risk map — click the three brightest predicted hotspots" }, [
       h("img", { src: "assets/img/risk_map.png", alt: "Coexistence Risk Index map of Europe" })
     ]);
     function toLonLat(fx, fy) {
       return [EXTENT[0] + fx * (EXTENT[1] - EXTENT[0]), EXTENT[3] - fy * (EXTENT[3] - EXTENT[2])];
     }
-    function place(hs, fx, fy) {
+    const inBox = (lon, lat, b) => lon >= b[0] && lon <= b[1] && lat >= b[2] && lat <= b[3];
+    function place(label, fx, fy) {
       map.appendChild(h("div", { class: "g-hot", style: `left:${fx * 100}%;top:${fy * 100}%` }));
-      map.appendChild(h("div", { class: "g-maplabel", style: `left:${fx * 100}%;top:${fy * 100}%` }, [hs.name]));
+      map.appendChild(h("div", { class: "g-maplabel", style: `left:${fx * 100}%;top:${fy * 100}%` }, [label]));
     }
     map.addEventListener("click", e => {
       const r = map.getBoundingClientRect();
       const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
       const [lon, lat] = toLonLat(fx, fy);
-      let hit = null, best = 1e9;
-      for (const hs of HOTSPOTS) {
-        if (found.has(hs.name)) continue;
-        const d = Math.hypot((lon - hs.lon) * Math.cos(lat * Math.PI / 180), lat - hs.lat);
-        if (d < best) { best = d; hit = hs; }
-      }
-      if (hit && best < 4.2) {
-        found.add(hit.name); clearWrong();
-        // snap marker to the true hotspot location
-        const tfx = (hit.lon - EXTENT[0]) / (EXTENT[1] - EXTENT[0]);
-        const tfy = (EXTENT[3] - hit.lat) / (EXTENT[3] - EXTENT[2]);
-        place(hit, tfx, tfy);
-        if (found.size === HOTSPOTS.length) {
-          feedback("<b>Excellent!</b> These are among the major conflict hotspots our model predicts — the Alps, Carpathians and southern Scandinavia — found <b>without any historical conflict data</b>. <b>Final key earned.</b>", true);
+      // 1) Scotland — the artefact: explain, don't penalise
+      if (inBox(lon, lat, SCOTLAND)) { feedback(nextScotlandMsg(), "info"); return; }
+      // 2) an accept-region?
+      const reg = REGIONS.find(R => inBox(lon, lat, R.box));
+      if (reg) {
+        if (found.has(reg.name)) { showAlready(); return; }   // already found → neutral reminder
+        found.add(reg.name); clearWrong();
+        place(reg.name, fx, fy);
+        if (found.size === REGIONS.length) {
+          feedback("<b>Excellent!</b> The model's brightest conflict hotspots — the <b>Alps</b>, the <b>Poland–Belarus lowland belt</b>, and the <b>north-eastern Baltic</b> corner — found <b>without any historical conflict data</b>. <b>Final key earned.</b>", true);
           awardKey(3);
           setTimeout(() => stage.querySelector(".g-room").appendChild(nextControls(3)), 500);
         } else {
-          feedback(`Hotspot found: <b>${hit.name}</b>. ${HOTSPOTS.length - found.size} to go — look for the other bright clusters.`, true);
+          feedback(`Hotspot found: <b>${reg.name}</b>. ${REGIONS.length - found.size} to go — look for the other bright clusters.`, true);
         }
-      } else {
-        const m = h("div", { class: "g-miss", style: `left:${fx * 100}%;top:${fy * 100}%` });
-        map.appendChild(m); setTimeout(() => m.remove(), 600);
-        showWrong();
+        return;
       }
+      // 3) genuine miss
+      const m = h("div", { class: "g-miss", style: `left:${fx * 100}%;top:${fy * 100}%` });
+      map.appendChild(m); setTimeout(() => m.remove(), 600);
+      showWrong();
     });
 
     stage.append(h("div", { class: "g-room" }, [
@@ -468,8 +499,8 @@
       h("p", { class: "g-story" }, ["This is our Coexistence Risk Index — bright = high predicted conflict. Click the three biggest hotspots to confirm the model's forecast."]),
       map,
       h("div", { class: "g-controls" }, [inlineFb()]),
-      h("p", { class: "cap", style: "margin-top:10px" }, ["Tip: the brightest bands trace the Alps, the Carpathian arc, and the southern edge of Scandinavia."]),
-      hintControl(3, "Look at the mountain arcs of central Europe and the forest fringe of southern Scandinavia — the brightest bands."),
+      h("p", { class: "cap", style: "margin-top:10px" }, ["Tip: the brightest bands trace the Alps, the Poland–Belarus lowlands, and the north-eastern Baltic (Gulf-of-Finland) corner. Scotland looks bright too — but click it to see why that's a trap."]),
+      hintControl(3, "Look at the Alpine arc, the Poland–Belarus lowlands, and the far north-east around the Gulf of Finland — the brightest clusters. Scotland's glow is a coastal artefact, not a real hotspot."),
       h("div", { class: "g-feedback", id: "gFb" }),
       sideRail()
     ]));

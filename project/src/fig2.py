@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
+from matplotlib.lines import Line2D
 import config as C
 import figstyle as FS
 import figdata as FD
@@ -130,6 +131,15 @@ def panel_c(ax, A):
     ax.set_xlabel("Latitude (°N)")
     ax.set_ylabel("Required range shift (km)")
     ax.set_title("Poleward intensification of displacement", loc="left")
+    # legend mapping each coloured trend line + shape marker to its species
+    handles = [Line2D([0], [0], color=C.SPECIES_COLOR[sp], lw=1.7,
+                      marker=C.SPECIES_MARKER[sp], ms=4.5, mfc=C.SPECIES_COLOR[sp],
+                      mec="white", mew=0.5, label=C.SPECIES_COMMON[sp])
+               for sp in sps]
+    leg = ax.legend(handles=handles, loc="upper right", ncol=2, fontsize=5.7,
+                    handlelength=1.5, columnspacing=0.9, labelspacing=0.3,
+                    borderpad=0.4, framealpha=0.9, edgecolor=FS.FAINT)
+    leg.get_frame().set_linewidth(0.5)
 
 
 def panel_d(ax, A):

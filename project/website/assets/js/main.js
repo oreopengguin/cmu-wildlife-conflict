@@ -161,4 +161,45 @@
     }), { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
     sections.forEach(s => io.observe(s));
   })();
+
+  /* ---------- figure panel hover — name the sub-panel under the cursor ----------
+     Each 2x2 flagship figure carries its four real panel titles in data-panels
+     ("a … | b … | c … | d …"). Hovering a quadrant highlights it and shows the
+     panel's own title — pure identification, no new information. */
+  (function () {
+    const tip = window.GOC && window.GOC.tip;
+    if (!tip) return;
+    document.querySelectorAll(".figure[data-panels]").forEach(fig => {
+      const items = fig.getAttribute("data-panels").split("|");
+      const img = fig.querySelector("img");
+      if (items.length !== 4 || !img) return;
+      if (matchMedia("(pointer:coarse)").matches) return;   // hover is a pointer affordance
+      fig.style.position = "relative";
+      const hl = document.createElement("div"); hl.className = "fig-hl"; fig.appendChild(hl);
+      const cap = fig.querySelector(".cap");        // put the affordance in the caption (no overlap)
+      if (cap && !cap.querySelector(".fig-caphint")) {
+        const s = document.createElement("span"); s.className = "fig-caphint";
+        s.textContent = " · hover any panel to name it"; cap.appendChild(s);
+      }
+      let shown = false;
+      function move(e) {
+        const r = img.getBoundingClientRect(), fr = fig.getBoundingClientRect();
+        const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+        if (fx < 0 || fx > 1 || fy < 0 || fy > 1) { leave(); return; }
+        const col = fx < 0.5 ? 0 : 1, row = fy < 0.5 ? 0 : 1, idx = row * 2 + col;
+        hl.style.left = (r.left - fr.left + col * 0.5 * r.width) + "px";
+        hl.style.top = (r.top - fr.top + row * 0.5 * r.height) + "px";
+        hl.style.width = (0.5 * r.width) + "px";
+        hl.style.height = (0.5 * r.height) + "px";
+        hl.style.opacity = "1";
+        const s = items[idx], k = s.indexOf(" — ");
+        const label = k < 0 ? s : s.slice(0, k), desc = k < 0 ? "" : s.slice(k + 3);
+        tip.show(`<span class="tt-t">Panel ${label}</span>${desc}`, e.clientX, e.clientY);
+        shown = true;
+      }
+      function leave() { hl.style.opacity = "0"; if (shown) { tip.hide(); shown = false; } }
+      img.addEventListener("mousemove", move);
+      img.addEventListener("mouseleave", leave);
+    });
+  })();
 })();

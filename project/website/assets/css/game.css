@@ -103,6 +103,7 @@
 .g-feedback.show{display:block;animation:g-fade .4s}
 .g-feedback.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 9%,transparent)}
 .g-feedback.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.g-feedback.info{border-color:var(--sky);background:color-mix(in srgb,var(--sky) 9%,transparent)}
 .g-feedback b{color:var(--ink)}
 .g-controls{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;align-items:center}
 /* compact "wrong guess" indicator, sits right next to the check button */
@@ -113,6 +114,8 @@
 .g-inline-fb .x{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;
   background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad);font-size:11px;
   font-weight:800;flex:none}
+.g-inline-fb.info{color:var(--warn)}
+.g-inline-fb.info .x{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
 @keyframes g-fbpop{0%{opacity:0;transform:translateX(-7px) scale(.92)}
   60%{transform:translateX(2px) scale(1.02)}100%{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.g-inline-fb.show{animation:none}}

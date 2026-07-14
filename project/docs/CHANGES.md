@@ -93,6 +93,50 @@ invented, inflated, or cherry-picked.**
   and **nav scroll-spy** highlighting the current section. Plus a hover-**spotlight**
   on the niche chart. None add information.
 
+## Honesty correction — conflict hotspots (pass 3)
+
+A reader flagged that the prose over-stated the **Carpathians** as a top hotspot while
+the actual CRI map is dim there. We **verified this against the committed CRI grid**
+(`results/analysis.npz`) before changing any words. Region means (brightness as rendered
+on `risk_map.png`; friction and |Δsuit| from the same file):
+
+| Region | mean CRI | friction | \|Δsuit\| | verdict |
+|---|---|---|---|---|
+| **Alps** | +2.64 | 0.38 | 0.047 | strongest, genuine (high friction **and** real habitat change) |
+| **Poland–Belarus lowland belt** | +1.50 | 0.39 | 0.016 | clear secondary, genuine (high human pressure) |
+| **NE Baltic / Gulf-of-Finland corner** | +2.43 | 0.43 | 0.007 | brightest individual cells; partly a coastal effect |
+| Carpathians | +0.70 | 0.34 | 0.027 | only moderate — **not** a leading hotspot |
+| Iberia | −0.79 | 0.20 | 0.044 | not a hotspot |
+| S. Scandinavia | +0.05 | — | — | not a hotspot |
+| **Scotland** | +0.67 | **0.76** | **0.012** | **artefact**: highest friction anywhere, near-zero real change |
+
+Changes made (site + manuscript), all matching the data above:
+- Replaced Carpathians / Iberia / Fennoscandia hotspot claims with **Alps + Poland–Belarus
+  belt + NE-Baltic corner** in `index.html` (finding 3, Figure 4 caption), the game notebook
+  fact, and `manuscript.md` (Results §4.2, §4.4).
+- Added an **honest caveat** (site callout + manuscript Limitations) explaining that coastal
+  and island cells — **Scotland** most clearly — carry *artificial* friction because the
+  optimal-transport step must move their habitat mass across open water, inflating the risk
+  index even though the habitat barely changes (Figure 2a). This is a data-confirmed model
+  limitation, stated plainly rather than hidden.
+
+## Website — interactivity pass 3 (no numerical result changed)
+
+- **Sources** link added to the top nav (→ `sources.html`).
+- **Escape-room game, Station 4** now accepts a click anywhere in the three genuinely-bright
+  regions (Alps / NE-Baltic / Poland–Belarus, verified above); clicking **Scotland** shows the
+  artefact explanation (rotating phrasings) instead of a wrong mark; clicking an
+  already-found region shows a rotating neutral "already found" message. Tip/hint/success
+  text updated to the real hotspots.
+- **Escape-room game, Station 3** bug fixed: submitting the correct answer repeatedly no
+  longer logs the notebook note or shows the "Next station" button more than once (per-room
+  `locked` guard + idempotent `awardKey`).
+- **Figure 2c** now has a **legend** mapping each coloured trend line + shape marker to its
+  species (regenerated `figure2_transport` PNG/PDF and web JPG from committed results).
+- **Figure panel-hover**: on the five 2×2 flagship figures, hovering a quadrant highlights it
+  and names the panel using that panel's **own title** (carried in `data-panels`) — pure
+  identification, no new information.
+
 ## Reproducibility
 
 - `src/export_web.py` regenerates all website data/images from committed results.

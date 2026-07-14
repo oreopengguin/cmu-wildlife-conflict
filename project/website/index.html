@@ -19,6 +19,7 @@
   <a class="navlink" href="#results">Results</a>
   <a class="navlink" href="#future">Frontiers</a>
   <a class="navlink" href="#game">Play</a>
+  <a class="navlink" href="sources.html">Sources</a>
   <button class="toggle" id="themeBtn" aria-label="Toggle colour theme">◐ theme</button>
 </div></nav>
 
@@ -86,7 +87,7 @@
     as its exact equivalent, a penalized Poisson point process — and fit it for seven
     European mammals from 57,838 GBIF records.</p>
 
-  <div class="figure"><img alt="Figure 1: framework and data" src="assets/img/figure1_framework.jpg" loading="lazy">
+  <div class="figure" data-panels="a · Records — georeferenced sightings of all 7 taxa across Europe|b · Niches — realized climatic niches in bioclim-PCA space|c · Pipeline — the conflict-data-free Gibbs → transport → topology → risk schematic|d · Skill — block cross-validation AUC &amp; Boyce per species"><img alt="Figure 1: framework and data" src="assets/img/figure1_framework.jpg" loading="lazy">
     <div class="cap"><b>Figure 1 — Framework &amp; data.</b> Occurrence density and realized
       climatic niches; the Gibbs&rarr;transport&rarr;topology pipeline; and spatial
       cross-validation skill. Colours use the Okabe–Ito colourblind-safe palette with
@@ -142,7 +143,7 @@
   <p class="sub">Three geometric tools turn "where habitat is" into "where it must go, whether
     it can get there, and how it breaks apart" — the machinery that makes conflict predictable.</p>
 
-  <div class="figure"><img alt="Figure 2: optimal transport" src="assets/img/figure2_transport.jpg" loading="lazy">
+  <div class="figure" data-panels="a · Gain vs loss — present vs future habitat (SSP2-4.5)|b · Displacement — the entropic optimal-transport field T(x)−x|c · Poleward intensity — required range shift vs latitude, per species|d · Friction — habitat pushed up the human-pressure gradient"><img alt="Figure 2: optimal transport" src="assets/img/figure2_transport.jpg" loading="lazy">
     <div class="cap"><b>Figure 2 — Entropic displacement.</b> Present vs future habitat; the
       optimal-transport displacement field (streamlines flowing poleward); the poleward
       intensification of shift; and the <b>Coexistence Friction</b> field where habitat is
@@ -154,7 +155,7 @@
     <div class="panel d"><h4>d · Friction</h4><p>F(x)=&langle;displacement, &nabla;human-pressure&rangle;<sub>+</sub> — the conflict-pressure field.</p></div>
   </div>
 
-  <div class="figure"><img alt="Figure 3: connectivity and topology" src="assets/img/figure3_connectivity_topology.jpg" loading="lazy">
+  <div class="figure" data-panels="a · Current — climate-forced movement routed through the landscape|b · Corridors — pinch-points where current crosses human pressure|c · Persistence — the persistence diagram of the range's shape|d · Simplification — topological simplification of the habitat"><img alt="Figure 3: connectivity and topology" src="assets/img/figure3_connectivity_topology.jpg" loading="lazy">
     <div class="cap"><b>Figure 3 — Connectivity &amp; topology.</b> A spectral graph-Laplacian
       solve routes forced movement into discrete conflict corridors and pinch-points;
       cubical persistent homology shows the range's interior gaps (H<sub>1</sub> loops)
@@ -196,8 +197,8 @@
     <div class="finding"><div class="idx">3</div><div>
       <h4>Movement funnels into conflict corridors, and the range frays</h4>
       <p>Routing that demand through the landscape's resistance concentrates it into discrete
-        <b>conflict corridors and pinch-points</b> — the Alps, Carpathians, and farmland–forest
-        edges. Persistent homology shows the range's interior gaps (H<sub>1</sub> loops) rising
+        <b>conflict corridors and pinch-points</b> — the Alps, the Poland–Belarus lowlands, and
+        farmland–forest edges. Persistent homology shows the range's interior gaps (H<sub>1</sub> loops) rising
         from <b>2,389 to 2,536</b>: more fragmentation means more edge, and edges are where people
         and wildlife meet.</p></div></div>
 
@@ -220,12 +221,24 @@
         maximum-entropy property to <b>r = 0.99998</b>.</p></div></div>
   </div>
 
-  <div class="figure" style="margin-top:34px"><img alt="Figure 4: risk and validation" src="assets/img/figure4_risk_validation.jpg" loading="lazy">
-    <div class="cap"><b>Figure 4 — Coexistence Risk Index &amp; validation.</b> The fused risk index
-      localizes to the peri-Alpine arc, Carpathians, Iberia, and the Fennoscandian fringe; the
-      validation panels show the two out-of-sample tests above.</div></div>
+  <div class="callout">
+    <div class="eyebrow">An honest caveat — where the map can mislead</div>
+    <p style="margin:10px 0 0">Not every bright cell is a real hotspot. <b>Coastal and island cells pick up
+      artificial friction</b>: because the optimal-transport step must move their habitat mass across
+      open water, a large displacement crosses the human-pressure gradient even when the habitat itself
+      barely changes. <b>Scotland</b> is the clearest case — its friction is the highest anywhere, yet its
+      actual habitat gain or loss is minimal (Figure 2a). The north-eastern Baltic / Gulf-of-Finland corner
+      is bright for a similar coastal reason layered on genuinely high human pressure. The most robust
+      hotspots — high friction backed by <em>real</em> habitat change — are the <b>Alps</b> and the
+      <b>Poland–Belarus lowland belt</b>.</p>
+  </div>
 
-  <div class="figure"><img alt="Figure S1: robustness" src="assets/img/figureS1_robustness.jpg" loading="lazy">
+  <div class="figure" style="margin-top:34px" data-panels="a · Risk map — emergent human–wildlife conflict risk (2081–2100)|b · Shift test — predicted vs observed range shift (ρ = 0.64)|c · Interface test — friction predicts realized interface (p = 0.0005)|d · Decomposition — per-species contribution of the three signals"><img alt="Figure 4: risk and validation" src="assets/img/figure4_risk_validation.jpg" loading="lazy">
+    <div class="cap"><b>Figure 4 — Coexistence Risk Index &amp; validation.</b> The fused risk index
+      is brightest over the peri-Alpine arc, the Poland–Belarus lowland belt, and the north-eastern
+      Baltic (Gulf-of-Finland) corner; the validation panels show the two out-of-sample tests above.</div></div>
+
+  <div class="figure" data-panels="a · Scenario — range shift scales with emissions|b · Invariance — the conflict pattern is scenario-invariant (r = 0.98)|c · Stability — OT shift stable across grid and regularization settings|d · Solver — satisfies the max-entropy constraint (r = 0.99998)"><img alt="Figure S1: robustness" src="assets/img/figureS1_robustness.jpg" loading="lazy">
     <div class="cap"><b>Figure S1 — Robustness &amp; verification.</b> Scenario scaling, friction
       scenario-invariance (r = 0.98), optimal-transport stability, and the solver constraint check
       (r = 0.99998).</div></div>

@@ -224,3 +224,10 @@ footer{border-top:1px solid var(--line);padding:44px 0 72px;color:var(--slate);f
 .mini-btn:hover{border-color:var(--ink);transform:translateY(-1px)}
 .mini-btn[aria-pressed="true"]{background:color-mix(in srgb,var(--ember) 14%,transparent);
   border-color:var(--ember);color:var(--ember)}
+
+/* ---- figure panel hover ---- */
+.fig-hl{position:absolute;pointer-events:none;border:1.5px solid var(--ember);
+  background:color-mix(in srgb,var(--ember) 7%,transparent);border-radius:8px;opacity:0;
+  transition:opacity .12s ease, left .09s ease, top .09s ease, width .09s ease, height .09s ease;z-index:2}
+.fig-caphint{color:var(--ember);font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+@media(pointer:coarse){.fig-caphint{display:none}}

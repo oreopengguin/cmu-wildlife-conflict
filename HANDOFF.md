@@ -199,8 +199,10 @@ Global Human Modification. Domain = Europe, bbox lon[-12,40] lat[34,72], grid 1/
 - **Robustness:** SSP5-8.5 shifts bigger (mean **714 km**) but the *spatial* friction pattern
   is nearly identical (**r = 0.98**); grid-invariant (CV 0.5%); the from-scratch solver hits
   the maximum-entropy feature-matching constraint to **r = 0.99998**.
-- Fragmentation H1 loops rise 2,389 → 2,536; CRI hotspots = Alps, Carpathians, Iberia,
-  Fennoscandian fringe.
+- Fragmentation H1 loops rise 2,389 → 2,536; CRI hotspots (verified vs `analysis.npz`) =
+  **Alps** (strongest) + **Poland–Belarus lowland belt** + **NE-Baltic / Gulf-of-Finland**
+  corner. Carpathians/Iberia/Fennoscandia are *not* leading hotspots; some coastal/island
+  cells (esp. **Scotland**) are over-water friction **artefacts** — see `docs/CHANGES.md`.
 
 ---
 
@@ -342,7 +344,10 @@ retired (the old `gh-pages` branch was deleted).
   `window.GOC.species` and fires `goc-data-ready`.
 - `assets/js/main.js` — theme toggle, hero flow-field, scroll-reveal, shared tooltip, **and**
   the interactive **pipeline strip** (`#pipeStrip`, hover/tap a stage), **stat count-up** on
-  scroll, and **nav scroll-spy**. All text is a rephrase of existing on-page copy.
+  scroll, **nav scroll-spy**, and **figure panel-hover** (any `.figure[data-panels]` — hovering
+  a quadrant of a 2×2 flagship figure highlights it and names the panel from its own title).
+  All text is a rephrase of existing on-page copy. The top nav also has a **Sources** link
+  (`sources.html`).
 - `assets/js/maps.js` — the **present↔2090 SDM viewer**: drag divider to wipe, hover to read
   the real coarse suitability grid (`sdm_grids.json`, base64 Uint8 arrays), species chips, plus
   an **`▶ Auto-sweep`** toggle (`#sdmPlay`) that animates the wipe hands-free.
@@ -408,10 +413,16 @@ Four "research stations", each teaching one pipeline idea; collect 4 keys → fi
   wrong guesses always change. The verbose green box is reserved for correct answers.
 - **Room 2 — Predict the Migration:** 4 direction buttons; correct = **North**; animates a
   compass arrow north.
-- **Room 3 — Spot the Conflict Zones:** multi-select; correct = **Farmland + City**.
-- **Room 4 — Find the Future Hotspots:** click 3 hotspots on `risk_map.png`; targets Alps
-  (10.5,46.4), Carpathians (24.5,47.8), S. Scandinavia (13.5,59.0); tolerance ~4.2°; map
-  extent `[-12,40,34,72]` (lon/lat); glowing circles snap to true locations.
+- **Room 3 — Spot the Conflict Zones:** multi-select; correct = **Farmland + City**. Guarded
+  by a per-room `locked` flag so re-submitting the correct answer can't double-log the note or
+  double-add the Next button (`awardKey` is also idempotent).
+- **Room 4 — Find the Future Hotspots:** click inside any of three **accept-regions** on
+  `risk_map.png` — `REGIONS` boxes for the **Alps**, the **NE Baltic / Gulf-of-Finland**
+  corner, and the **Poland–Belarus belt** (the genuinely-bright CRI clusters, verified against
+  `analysis.npz`). Clicking **Scotland** (`SCOTLAND` box) shows the over-water-friction
+  **artefact explanation** (rotating `SCOTLAND_MSGS`) and does not penalise; clicking an
+  already-found region shows a rotating neutral "already found" message (`ALREADY_MSGS`, via
+  `showAlready()`); a genuine miss shows the red ✕ (`showWrong()`). Map extent `[-12,40,34,72]`.
 - **Final:** 4 keys fly into a lock, door opens, confetti, 4 badges, star rating, "Explore
   the Project Again" (scroll to top) + "Play again".
 
