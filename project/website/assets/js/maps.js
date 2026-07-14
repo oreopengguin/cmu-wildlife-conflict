@@ -62,6 +62,34 @@
       if (e.key === "ArrowRight") { setWipe(wipe + 4); e.preventDefault(); }
     });
 
+    /* ----- auto-sweep between today and 2090 (hands-free demo) ----- */
+    const playBtn = document.getElementById("sdmPlay");
+    let sweeping = false, rafId = null;
+    function stopSweep() {
+      sweeping = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      if (playBtn) { playBtn.setAttribute("aria-pressed", "false"); playBtn.innerHTML = "▶ Auto-sweep"; }
+    }
+    function startSweep() {
+      if (matchMedia("(prefers-reduced-motion:reduce)").matches) { setWipe(0); return; }
+      sweeping = true;
+      playBtn.setAttribute("aria-pressed", "true"); playBtn.innerHTML = "❚❚ Pause";
+      const t0 = performance.now() - 650;      // begin near 50% so there is no jump
+      (function frame(now) {
+        if (!sweeping) return;
+        const u = ((now - t0) / 2600) % 1;       // 2.6 s there-and-back
+        const tri = u < 0.5 ? u * 2 : 2 - u * 2; // 0→1→0
+        setWipe(100 - tri * 100);
+        rafId = requestAnimationFrame(frame);
+      })(performance.now());
+    }
+    if (playBtn) playBtn.addEventListener("click", () => sweeping ? stopSweep() : startSweep());
+    divider.addEventListener("mousedown", stopSweep);
+    divider.addEventListener("touchstart", stopSweep, { passive: true });
+    divider.addEventListener("keydown", stopSweep);
+    // switching species stops a running sweep for clarity
+    chips.addEventListener("click", stopSweep);
+
     /* ----- hover readout from the real coarse grid ----- */
     function readAt(clientX, clientY) {
       const r = stage.getBoundingClientRect();

@@ -7,7 +7,7 @@
 > **Keep this document updated after any future change** (there is a maintenance
 > checklist at the bottom).
 
-Last updated: 2026-07-12. Repo: `https://github.com/oreopengguin/cmu-wildlife-conflict`
+Last updated: 2026-07-14. Repo: `https://github.com/oreopengguin/cmu-wildlife-conflict`
 Live site: `https://cmu-wildlife-conflict.vercel.app/`
 This file **is committed to the repo** (at the repo root), so it travels with a fresh clone.
 It was validated by a from-scratch simulated handoff (fresh AI context, no chat history) that
@@ -335,16 +335,22 @@ retired (the old `gh-pages` branch was deleted).
   "poleward field" hero canvas, IntersectionObserver scroll-reveal, `window.GOC.tip`
   (shared tooltip) + `window.GOC.cssVar`.
 - `assets/js/charts.js` — fetches `meta.json`, `skill.json`, `niche.json`; renders the
-  **interactive niche SVG** (hoverable species hulls + shape markers + toggle legend) and the
-  **interactive skill dot-plot** (hover for exact AUC/Boyce±SD); injects the **6 future-
-  research cards** (content is a `FRONTIERS` array in this file). Sets `window.GOC.species`
-  and fires `goc-data-ready`.
+  **interactive niche SVG** (Gaussian-KDE **density contours matching Fig 1B** — polylines in
+  `niche.json.species[*].contours`, level 0.4·max — + shape markers + toggle legend + hover
+  **spotlight** that dims other species) and the **interactive skill dot-plot** (hover for exact
+  AUC/Boyce±SD); injects the **6 future-research cards** (`FRONTIERS` array in this file). Sets
+  `window.GOC.species` and fires `goc-data-ready`.
+- `assets/js/main.js` — theme toggle, hero flow-field, scroll-reveal, shared tooltip, **and**
+  the interactive **pipeline strip** (`#pipeStrip`, hover/tap a stage), **stat count-up** on
+  scroll, and **nav scroll-spy**. All text is a rephrase of existing on-page copy.
 - `assets/js/maps.js` — the **present↔2090 SDM viewer**: drag divider to wipe, hover to read
-  the real coarse suitability grid (`sdm_grids.json`, base64 Uint8 arrays), species chips.
+  the real coarse suitability grid (`sdm_grids.json`, base64 Uint8 arrays), species chips, plus
+  an **`▶ Auto-sweep`** toggle (`#sdmPlay`) that animates the wipe hands-free.
   Uses images `assets/img/sdm/<Species_key>_{present,future}.png` (key has spaces→underscores).
 - `assets/js/game.js` — the escape-room game (see §8).
 - `assets/data/*.json` — REAL exported data (from `export_web.py`). `meta.json` (species +
-  key results), `skill.json`, `niche.json` (PCA hulls), `sdm_grids.json` (coarse suitability
+  key results), `skill.json`, `niche.json` (bioclim-PCA KDE density **contours**, Fig-1B-matched),
+`sdm_grids.json` (coarse suitability
   for hover, base64), `risk_grid.json` (coarse CRI).
 - `assets/img/` — figure JPGs, `risk_map.png` (clean CRI map for the game), `sdm/*.png`.
 
@@ -392,8 +398,14 @@ Always do a build→render→critique→fix loop; check both themes and mobile.
 Title: *"Escape Room: Save the Wildlife Before It's Too Late."* Right after Conclusions.
 Four "research stations", each teaching one pipeline idea; collect 4 keys → final unlock.
 
-- **Room 1 — Restore the Pipeline:** drag/reorder (▲▼ buttons + native drag) 4 cards into
-  `Climate Data → Habitat Model → Animal Movement → Coexistence Risk Map`.
+- **Room 1 — Restore the Pipeline:** reorder 4 cards into
+  `Climate Data → Habitat Model → Animal Movement → Coexistence Risk Map`. Drag is a
+  **pointer-based live sortable** (cards re-flow as you drag, held card tracks the cursor with
+  no drop-shadow; absolute layout via a `--ty` CSS var). A grip handle keeps touch-scroll
+  working; ▲▼ buttons + arrow keys are the accessible fallback.
+- **Wrong-answer feedback (all rooms):** a compact red ✕ + a message from a large rotating
+  pool (`WRONG_MSGS`) appears next to the check/submit button via `showWrong()`; consecutive
+  wrong guesses always change. The verbose green box is reserved for correct answers.
 - **Room 2 — Predict the Migration:** 4 direction buttons; correct = **North**; animates a
   compass arrow north.
 - **Room 3 — Spot the Conflict Zones:** multi-select; correct = **Farmland + City**.

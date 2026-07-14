@@ -42,10 +42,10 @@
 
 <!-- ===================== STAT BAND ===================== -->
 <div class="stats" id="statBand">
-  <div class="stat"><div class="n">7</div><div class="l">conflict-prone taxa modelled across Europe</div></div>
-  <div class="stat"><div class="n">484<small> km</small></div><div class="l">mean climate-forced range shift by 2081–2100</div></div>
-  <div class="stat"><div class="n">0.64</div><div class="l">rank agreement, predicted vs observed shift</div></div>
-  <div class="stat"><div class="n">0.0005</div><div class="l">permutation p — friction predicts real interface</div></div>
+  <div class="stat"><div class="n" data-count="7" data-dec="0">7</div><div class="l">conflict-prone taxa modelled across Europe</div></div>
+  <div class="stat"><div class="n" data-count="484" data-dec="0" data-suffix=" km">484<small> km</small></div><div class="l">mean climate-forced range shift by 2081–2100</div></div>
+  <div class="stat"><div class="n" data-count="0.64" data-dec="2">0.64</div><div class="l">rank agreement, predicted vs observed shift</div></div>
+  <div class="stat"><div class="n" data-count="0.0005" data-dec="4">0.0005</div><div class="l">permutation p — friction predicts real interface</div></div>
 </div>
 
 <!-- ===================== THE IDEA ===================== -->
@@ -63,6 +63,18 @@
       and topology of climate-forced redistribution. Because the model never sees conflict
       data, testing it against reality is a genuine out-of-sample test — not a re-fit.</p>
     <div class="eq">p(x) &prop; e<sup>&beta;·f(x)</sup> &nbsp;&rarr;&nbsp; min&nbsp;&langle;P,C&rangle; &minus; &epsilon;H(P) &nbsp;&rarr;&nbsp; F(x) = &langle;T(x), &nabla;H(x)&rangle;<sub>+</sub> &nbsp;&rarr;&nbsp; Coexistence Risk</div>
+  </div>
+
+  <!-- interactive pipeline overview (rephrases the pipeline already shown in Fig 1c) -->
+  <div class="pipe" id="pipeStrip" role="group" aria-label="Interactive overview of the five pipeline stages">
+    <div class="pipe-track">
+      <button class="pipe-node" data-i="0" aria-describedby="pipeDesc"><span class="pn-k">01</span><span class="pn-l">Records</span></button>
+      <button class="pipe-node" data-i="1" aria-describedby="pipeDesc"><span class="pn-k">02</span><span class="pn-l">Habitat model</span></button>
+      <button class="pipe-node" data-i="2" aria-describedby="pipeDesc"><span class="pn-k">03</span><span class="pn-l">Transport</span></button>
+      <button class="pipe-node" data-i="3" aria-describedby="pipeDesc"><span class="pn-k">04</span><span class="pn-l">Corridors &amp; topology</span></button>
+      <button class="pipe-node" data-i="4" aria-describedby="pipeDesc"><span class="pn-k">05</span><span class="pn-l">Risk</span></button>
+    </div>
+    <p class="pipe-desc" id="pipeDesc">Hover or tap a stage to walk the pipeline — the same flow the figures below build out.</p>
   </div>
 </section>
 
@@ -89,12 +101,12 @@
   </div>
 
   <div class="viz" id="skillViz">
-    <div class="viz-head"><h4>Interactive · model skill (spatial cross-validation)</h4>
+    <div class="viz-head"><h4>Interactive · model skill</h4>
       <span class="hint">hover a marker for exact values</span></div>
     <svg class="chart-svg" id="skillChart" viewBox="0 0 760 420" role="img" aria-label="Interactive skill chart"></svg>
     <p class="cap">AUC (does a true site outrank a random one?) and the presence-only Boyce
-      index. TSS is intentionally omitted — it is threshold-dependent and ill-suited to
-      presence-only data (see <a href="https://github.com/oreopengguin/cmu-wildlife-conflict/blob/main/project/docs/CHANGES.md">CHANGES.md</a>).</p>
+      index. TSS is not fit for MaxENT and its presence-only data as specificity can not be
+      accurately calculated without true absence data.</p>
   </div>
 
   <h3>Present &amp; future species distributions</h3>
@@ -103,7 +115,8 @@
     switch species below.</p>
   <div class="viz" id="sdmViz">
     <div class="viz-head"><h4 id="sdmTitle">Interactive · habitat today ↔ 2090</h4>
-      <span class="hint">drag divider · hover map</span></div>
+      <span class="viz-head-r"><button class="mini-btn" id="sdmPlay" aria-pressed="false" aria-label="Auto-sweep between today and 2090">▶ Auto-sweep</button>
+      <span class="hint">drag divider · hover map</span></span></div>
     <div class="sdm-wrap">
       <div class="sdm-stage" id="sdmStage">
         <img id="sdmPresent" alt="present suitability">

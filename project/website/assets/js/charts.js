@@ -53,39 +53,57 @@
     for (const p of bg) bgg.appendChild(el("circle", { cx: px(p[0]), cy: py(p[1]), r: 1.4, fill: "var(--faint)" }));
     svg.appendChild(bgg);
 
-    // species hulls + centroids
-    const groups = {};
+    // species density contours (Gaussian-KDE isoline at 0.4·max — identical
+    // construction to Figure 1B) + redundant shape marker at the niche centroid
+    const groups = {}, hidden = {};
+    function spotlight(key, on) {
+      for (const k in groups) {
+        if (hidden[k]) continue;
+        groups[k].style.opacity = (!on || k === key) ? "1" : "0.16";
+      }
+    }
     for (const sp of window.GOC.species) {
-      const s = data.species[sp.key]; if (!s) continue;
+      const s = data.species[sp.key]; if (!s || !s.contours) continue;
       const g = el("g", { class: "niche-sp", tabindex: 0, role: "img",
-        "aria-label": `${sp.common} climatic niche` });
-      const pts = s.hull.map(p => `${px(p[0])},${py(p[1])}`).join(" ");
-      const poly = el("polygon", { points: pts, fill: sp.color, "fill-opacity": 0.14,
-        stroke: sp.color, "stroke-width": 2, "stroke-linejoin": "round" });
-      g.appendChild(poly);
+        "aria-label": `${sp.common} realized climatic niche, ${s.n} grid cells` });
+      const polys = [];
+      for (const path of s.contours) {
+        const pts = path.map(p => `${px(p[0])},${py(p[1])}`).join(" ");
+        const poly = el("polygon", { points: pts, fill: sp.color, "fill-opacity": 0.07,
+          stroke: sp.color, "stroke-width": 1.8, "stroke-linejoin": "round",
+          "stroke-linecap": "round", "pointer-events": "all" });
+        g.appendChild(poly); polys.push(poly);
+      }
       marker(g, sp.marker, px(s.centroid[0]), py(s.centroid[1]), 6, sp.color);
-      const info = () => tipShow(sp, s);
+      const hi = on => {
+        polys.forEach(p => { p.setAttribute("fill-opacity", on ? 0.24 : 0.07);
+          p.setAttribute("stroke-width", on ? 2.8 : 1.8); });
+        spotlight(sp.key, on);
+      };
       g.addEventListener("mousemove", e => tip.show(
         `<span class="tt-t">${sp.common}</span>Realized climatic niche<br>${s.n.toLocaleString()} occupied grid cells`, e.clientX, e.clientY));
-      g.addEventListener("mouseenter", () => { poly.setAttribute("fill-opacity", 0.30); poly.setAttribute("stroke-width", 3); });
-      g.addEventListener("mouseleave", () => { poly.setAttribute("fill-opacity", 0.14); poly.setAttribute("stroke-width", 2); tip.hide(); });
-      g.addEventListener("focus", () => poly.setAttribute("fill-opacity", 0.30));
-      g.addEventListener("blur", () => poly.setAttribute("fill-opacity", 0.14));
+      g.addEventListener("mouseenter", () => hi(true));
+      g.addEventListener("mouseleave", () => { hi(false); tip.hide(); });
+      g.addEventListener("focus", () => hi(true));
+      g.addEventListener("blur", () => hi(false));
       groups[sp.key] = g; svg.appendChild(g);
     }
-    function tipShow() {}
 
-    // legend chips (toggle)
+    // legend chips: click to isolate/toggle · hover to spotlight
     const leg = document.getElementById("nicheLegend"); leg.innerHTML = "";
     for (const sp of window.GOC.species) {
+      if (!data.species[sp.key]) continue;
       const chip = document.createElement("button");
       chip.className = "chip"; chip.setAttribute("aria-pressed", "true");
       chip.innerHTML = `<span class="sw" style="background:${sp.color}"></span>${sp.common}`;
       chip.addEventListener("click", () => {
         const on = chip.getAttribute("aria-pressed") === "true";
         chip.setAttribute("aria-pressed", String(!on));
+        hidden[sp.key] = on;
         if (groups[sp.key]) groups[sp.key].style.display = on ? "none" : "";
       });
+      chip.addEventListener("mouseenter", () => { if (!hidden[sp.key]) spotlight(sp.key, true); });
+      chip.addEventListener("mouseleave", () => spotlight(sp.key, false));
       leg.appendChild(chip);
     }
   }

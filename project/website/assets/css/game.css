@@ -37,14 +37,34 @@
 .g-cards{display:flex;flex-direction:column;gap:10px;max-width:440px}
 .g-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;
   background:var(--card2);border:1px solid var(--line);cursor:grab;user-select:none;
-  font-weight:600;transition:transform .16s ease, box-shadow .16s ease, border-color .2s}
+  font-weight:600;transition:transform .16s ease, box-shadow .16s ease, border-color .2s, background .3s}
 .g-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.g-card.dragging{opacity:.6;cursor:grabbing;transform:scale(1.03);box-shadow:0 12px 30px rgba(0,0,0,.2)}
+.g-card .lbl{flex:1;min-width:0}
+/* live-sort mode: cards are absolutely stacked and positioned by --ty so the
+   whole strip re-flows smoothly as one is dragged (no drop-shadow ghost). */
+.g-cards.abs{position:relative;display:block}
+.g-cards.abs .g-card{position:absolute;left:0;right:0;top:0;margin:0;
+  transform:translateY(var(--ty,0));will-change:transform;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .16s, border-color .2s, background .3s}
+.g-grip{color:var(--faint);font-size:16px;line-height:1;cursor:grab;flex:none;
+  padding:0 2px 0 0;touch-action:none;letter-spacing:-1px;transition:color .2s}
+.g-card:hover .g-grip{color:var(--slate)}
+.g-cards.abs .g-card.dragging .g-grip{cursor:grabbing}
+.g-cards.abs .g-card:hover{transform:translateY(var(--ty,0));box-shadow:var(--shadow)}
+/* the tab held under the cursor: tracks the pointer, looks like the other three
+   (no shadow, no scale) — it is simply the one you're carrying. */
+.g-cards.abs .g-card.dragging{transition:none;z-index:6;box-shadow:none;cursor:grabbing}
 .g-card.snap{animation:g-snap .4s ease}
 @keyframes g-snap{0%{transform:scale(1.05)}60%{transform:scale(.97)}100%{transform:scale(1)}}
+@keyframes g-nudge{0%,100%{border-color:var(--line);background:var(--card2)}
+  30%,65%{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}}
+.g-card.nudge{animation:g-nudge .5s}
 .g-card .h{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
   background:var(--paper);font-size:15px;flex:none}
-.g-card .ord{margin-left:auto;font-family:var(--mono);color:var(--slate);font-size:12px}
+.g-card .ord{margin-left:auto;display:flex;gap:5px;flex:none}
+.g-mini{padding:3px 9px;font-size:12px;line-height:1;border-radius:8px;border:1px solid var(--line);
+  background:var(--paper);color:var(--slate);cursor:pointer;font-weight:700;transition:all .15s}
+.g-mini:hover{color:var(--ink);border-color:var(--ink)}
 .g-card.correct{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,transparent)}
 .g-arrows{display:flex;flex-direction:column;align-items:flex-start;gap:0}
 
@@ -84,7 +104,18 @@
 .g-feedback.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 9%,transparent)}
 .g-feedback.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
 .g-feedback b{color:var(--ink)}
-.g-controls{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
+.g-controls{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;align-items:center}
+/* compact "wrong guess" indicator, sits right next to the check button */
+.g-inline-fb{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;
+  color:var(--bad);opacity:0;transform:translateX(-4px);transition:opacity .2s;
+  pointer-events:none;min-height:20px}
+.g-inline-fb.show{opacity:1;transform:none;animation:g-fbpop .45s cubic-bezier(.2,.8,.2,1)}
+.g-inline-fb .x{display:inline-grid;place-items:center;width:19px;height:19px;border-radius:50%;
+  background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad);font-size:11px;
+  font-weight:800;flex:none}
+@keyframes g-fbpop{0%{opacity:0;transform:translateX(-7px) scale(.92)}
+  60%{transform:translateX(2px) scale(1.02)}100%{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.g-inline-fb.show{animation:none}}
 .g-btn{padding:10px 18px;border-radius:22px;border:1px solid var(--line);background:var(--card2);
   color:var(--ink);font-weight:600;font-size:14px;cursor:pointer;transition:transform .14s, box-shadow .14s}
 .g-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}

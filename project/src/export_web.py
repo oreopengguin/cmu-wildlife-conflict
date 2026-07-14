@@ -87,39 +87,63 @@ def export_skill():
 
 
 def export_niche(A):
+    """Realized climatic niches as Gaussian-KDE density contours in bioclim-PCA
+    space — the SAME construction as Figure 1B (a single isoline at 0.4*max per
+    species), so the interactive chart and the flagship figure match exactly."""
+    from scipy.stats import gaussian_kde
     d = np.load(C.DATA_PROC / "dataset.npz", allow_pickle=True)
     Pz = d["Pz"]; nx = int(d["nx"]); mask = A["mask"]
     land = np.flatnonzero(mask.ravel())
     X = Pz.reshape(Pz.shape[0], -1)[:, land].T
     rng = np.random.default_rng(0)
-    sub = rng.choice(len(X), size=min(2500, len(X)), replace=False)
-    pca = PCA(n_components=2).fit(X[sub])
-    bg = pca.transform(X[sub])
-    from scipy.spatial import ConvexHull
+    # PCA fit on a 6000-cell sample (matches figure 1B's fit)
+    fitsub = rng.choice(len(X), size=min(6000, len(X)), replace=False)
+    pca = PCA(n_components=2).fit(X[fitsub])
+    Yall = pca.transform(X)
+    # orient PC1 so higher = warmer (positive correlation with BIO1, the first
+    # standardized predictor) — keeps the "-> warmer / drier" axis label honest
+    if np.corrcoef(Yall[:, 0], X[:, 0])[0, 1] < 0:
+        pca.components_[0] *= -1
+        Yall = pca.transform(X)
+    bgsub = rng.choice(len(X), size=min(2200, len(X)), replace=False)
+    bg = Yall[bgsub]
+    xmin, xmax = float(Yall[:, 0].min()), float(Yall[:, 0].max())
+    ymin, ymax = float(Yall[:, 1].min()), float(Yall[:, 1].max())
+
     species = {}
     for sp in FD.species_present(A):
         cells = d[f"pres__{sp}"]; r = cells // nx; c = cells % nx
         Yi = pca.transform(Pz[:, r, c].T)
-        ctr = Yi.mean(axis=0)
-        # trim vagrant outliers (keep the central 85% by Mahalanobis-ish radius)
-        dist = np.linalg.norm((Yi - ctr) / (Yi.std(axis=0) + 1e-9), axis=1)
-        keep = Yi[dist <= np.percentile(dist, 85)]
-        s = keep[rng.choice(len(keep), size=min(400, len(keep)), replace=False)]
+        if len(Yi) < 40:
+            continue
         try:
-            hull = s[ConvexHull(s).vertices]
+            k = gaussian_kde(Yi[:, :2].T)
         except Exception:
-            hull = s
-        # shrink hull toward centroid for a clean, density-like niche outline
-        hull = ctr + 0.82 * (hull - ctr)
-        species[sp] = {"centroid": [round(float(ctr[0]), 3), round(float(ctr[1]), 3)],
-                       "hull": [[round(float(a), 3), round(float(b), 3)] for a, b in hull],
-                       "n": int(len(cells))}
+            continue
+        xx, yy = np.mgrid[xmin:xmax:80j, ymin:ymax:80j]
+        zz = k(np.vstack([xx.ravel(), yy.ravel()])).reshape(xx.shape)
+        lev = float(zz.max() * 0.4)                      # identical level to fig1B
+        fig = plt.figure(); ax = fig.add_subplot(111)
+        cs = ax.contour(xx, yy, zz, levels=[lev])
+        try:
+            segs = cs.allsegs[0]
+        except Exception:
+            segs = [p.vertices for p in cs.get_paths()]
+        paths = []
+        for seg in segs:
+            seg = np.asarray(seg)
+            if len(seg) >= 6:
+                paths.append([[round(float(a), 3), round(float(b), 3)] for a, b in seg])
+        plt.close(fig)
+        ctr = [round(float(Yi[:, 0].mean()), 3), round(float(Yi[:, 1].mean()), 3)]
+        species[sp] = {"centroid": ctr, "contours": paths, "n": int(len(cells))}
+
     out = {"pc1var": round(float(pca.explained_variance_ratio_[0] * 100)),
            "pc2var": round(float(pca.explained_variance_ratio_[1] * 100)),
            "background": [[round(float(a), 2), round(float(b), 2)] for a, b in bg],
            "species": species}
     (DATA / "niche.json").write_text(json.dumps(out))
-    print("wrote niche.json")
+    print(f"wrote niche.json ({sum(len(v['contours']) for v in species.values())} contour paths)")
 
 
 def render_map(field, mask, lons, lats, path, cmap=FS.SUIT, stretch98=None):

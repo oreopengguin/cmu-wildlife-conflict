@@ -84,4 +84,81 @@
   };
   window.GOC.cssVar = name =>
     getComputedStyle(root).getPropertyValue(name).trim();
+
+  /* ---------- interactive pipeline strip (rephrases Fig 1c's pipeline) ---------- */
+  (function () {
+    const strip = document.getElementById("pipeStrip");
+    if (!strip) return;
+    const desc = document.getElementById("pipeDesc");
+    const nodes = [...strip.querySelectorAll(".pipe-node")];
+    const TEXT = [
+      "We start from 57,838 open GBIF sightings — presence-only records of the seven conflict-prone taxa across Europe.",
+      "A from-scratch maximum-entropy model — its exact equivalent, a penalized Poisson point process — turns those records into present and future habitat-suitability maps.",
+      "Entropic optimal transport between the present and future maps gives a displacement field — where each patch of habitat must move — and the Coexistence Friction where it is pushed up the human-pressure gradient.",
+      "Spectral circuit theory routes that forced movement into corridors and pinch-points, while cubical persistent homology measures how the range fragments.",
+      "The three geometric signals fuse into a single Coexistence Risk Index — then face two independent tests on data the model never saw."
+    ];
+    let cur = -1, t = null;
+    function set(i) {
+      if (i === cur) return; cur = i;
+      nodes.forEach((n, k) => n.classList.toggle("active", k === i));
+      desc.style.opacity = "0"; clearTimeout(t);
+      t = setTimeout(() => { desc.textContent = TEXT[i]; desc.style.opacity = "1"; }, 120);
+    }
+    nodes.forEach((n, i) => {
+      n.addEventListener("mouseenter", () => set(i));
+      n.addEventListener("focus", () => set(i));
+      n.addEventListener("click", () => set(i));
+    });
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { if (cur === -1) set(0); io.disconnect(); }
+    }), { threshold: 0.4 });
+    io.observe(strip);
+  })();
+
+  /* ---------- stat-band count-up on scroll ---------- */
+  (function () {
+    const band = document.getElementById("statBand");
+    if (!band) return;
+    const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+    const render = (el, val) => {
+      const dec = +el.dataset.dec || 0, suf = el.dataset.suffix || "";
+      el.innerHTML = val.toFixed(dec) + (suf ? `<small>${suf}</small>` : "");
+    };
+    function run(el) {
+      const target = +el.dataset.count, dur = 1100, t0 = performance.now();
+      if (reduce) { render(el, target); return; }
+      (function frame(now) {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+        render(el, target * e);
+        if (p < 1) requestAnimationFrame(frame); else render(el, target);
+      })(t0);
+    }
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { run(e.target); io.unobserve(e.target); }
+    }), { threshold: 0.6 });
+    const nums = [...band.querySelectorAll(".n[data-count]")];
+    if (!reduce) nums.forEach(el => render(el, 0));   // start at 0 → no flash of the final value
+    nums.forEach(n => io.observe(n));
+  })();
+
+  /* ---------- nav scrollspy (highlight the section you're reading) ---------- */
+  (function () {
+    const map = {}, sections = [];
+    document.querySelectorAll(".nav a.navlink").forEach(a => {
+      const id = (a.getAttribute("href") || "").slice(1);
+      const s = id && document.getElementById(id);
+      if (s) { map[id] = a; sections.push(s); }
+    });
+    if (!sections.length) return;
+    let active = null;
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) {
+        if (active) active.classList.remove("active");
+        active = map[e.target.id];
+        if (active) active.classList.add("active");
+      }
+    }), { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+    sections.forEach(s => io.observe(s));
+  })();
 })();

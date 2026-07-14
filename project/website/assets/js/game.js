@@ -38,6 +38,39 @@
     "The risk map flags hotspots — Alps, Carpathians, S. Scandinavia — <b>without using any historical conflict data</b>."
   ];
 
+  /* ---------- varied wrong-answer feedback ----------------------------------
+     A large, rotating pool so a second (or tenth) wrong guess always reads
+     differently — the player can tell a new attempt registered. Kept short,
+     kind, and non-nagging: a small red ✗ beside the action, nothing more. */
+  const WRONG_MSGS = [
+    "Incorrect", "Not quite — try again", "Almost there!", "So close!",
+    "Give it another go", "Hmm, not that one", "Keep going — you've got this",
+    "Not this time", "Close! Rethink it", "Try again", "Not the one",
+    "Almost! One more try", "Not quite right", "You're on the trail — retry",
+    "Getting warmer… try again", "Have another go", "Missed it — try again",
+    "Not yet — keep at it", "Re-examine and retry", "Nearly! Adjust and retry",
+    "Off by a bit — try again", "Not the answer we need"
+  ];
+  let wrongSeq = shuffle(WRONG_MSGS), wrongPtr = 0;
+  function nextWrongMsg() {
+    if (wrongPtr >= wrongSeq.length) { wrongSeq = shuffle(WRONG_MSGS); wrongPtr = 0; }
+    return wrongSeq[wrongPtr++];
+  }
+  /* small inline indicator that lives next to the action / check button */
+  function inlineFb() { return h("span", { class: "g-inline-fb", id: "gInlineFb",
+    role: "status", "aria-live": "assertive" }, []); }
+  function showWrong() {
+    const box = document.getElementById("gInlineFb");
+    state.wrong++; save();
+    if (!box) return;
+    box.innerHTML = `<span class="x" aria-hidden="true">✕</span><span class="msg">${nextWrongMsg()}</span>`;
+    box.classList.remove("show"); void box.offsetWidth; box.classList.add("show"); // re-trigger anim
+  }
+  function clearWrong() {
+    const box = document.getElementById("gInlineFb");
+    if (box) { box.classList.remove("show"); box.innerHTML = ""; }
+  }
+
   /* ---------- shell ---------- */
   let stage, keysTray, notebookUl;
   function shell() {
@@ -151,6 +184,9 @@
   }
 
   /* ============================ ROOM 1 ============================ */
+  /* Live, pointer-based sortable: the whole strip re-flows as you drag —
+     the held tab tracks the cursor with no drop-shadow, the others slide to
+     make room, and the order updates the instant the cursor crosses a slot. */
   function room1() {
     const correct = ["Climate Data", "Habitat Model", "Animal Movement", "Coexistence Risk Map"];
     const icons = { "Climate Data": "🌡️", "Habitat Model": "🧬", "Animal Movement": "🦌", "Coexistence Risk Map": "🗺️" };
@@ -158,36 +194,103 @@
     if (order.join() === correct.join()) order = shuffle(correct); // avoid pre-solved
 
     stage.innerHTML = "";
-    const list = h("div", { class: "g-cards", id: "gDrag" });
+    const list = h("div", { class: "g-cards", id: "gDrag", role: "list",
+      "aria-label": "Order the four pipeline stages, top to bottom" });
+    const nodes = {};              // name -> element
+    const GAP = 10;
+    let cardH = 0, step = 0, listTop = 0;
+    let held = null, heldName = null, grabDY = 0, locked = false;
 
-    function paint() {
-      list.innerHTML = "";
+    function layout() {            // position every card (except the held one) by its slot
       order.forEach((name, i) => {
-        const card = h("div", { class: "g-card", draggable: "true", "data-name": name,
-          tabindex: "0", role: "listitem", "aria-label": `${name}, position ${i + 1}` }, [
-          h("span", { class: "h" }, [icons[name]]),
-          h("span", {}, [name]),
-          h("span", { class: "ord" }, [
-            h("button", { class: "g-btn", style: "padding:2px 8px;font-size:12px", title: "move up",
-              "aria-label": `move ${name} up`, onclick: () => { if (i > 0) { [order[i - 1], order[i]] = [order[i], order[i - 1]]; paint(); } } }, ["▲"]),
-            h("button", { class: "g-btn", style: "padding:2px 8px;font-size:12px;margin-left:4px", title: "move down",
-              "aria-label": `move ${name} down`, onclick: () => { if (i < order.length - 1) { [order[i + 1], order[i]] = [order[i], order[i + 1]]; paint(); } } }, ["▼"])
-          ])
-        ]);
-        // native drag reorder
-        card.addEventListener("dragstart", e => { card.classList.add("dragging"); e.dataTransfer.setData("text/plain", name); });
-        card.addEventListener("dragend", () => card.classList.remove("dragging"));
-        card.addEventListener("dragover", e => e.preventDefault());
-        card.addEventListener("drop", e => {
-          e.preventDefault();
-          const from = order.indexOf(e.dataTransfer.getData("text/plain"));
-          const to = order.indexOf(name);
-          if (from > -1 && to > -1) { order.splice(to, 0, order.splice(from, 1)[0]); paint(); }
-        });
-        list.appendChild(card);
+        const el = nodes[name];
+        if (el === held) return;
+        el.style.setProperty("--ty", (i * step) + "px");
       });
     }
-    paint();
+    function measure() {
+      cardH = nodes[order[0]].offsetHeight;
+      step = cardH + GAP;
+      list.style.height = (order.length * step - GAP) + "px";
+      list.classList.add("abs");
+      layout();
+    }
+    function moveByButton(name, dir) {
+      if (locked) return;
+      const i = order.indexOf(name), j = i + dir;
+      if (j < 0 || j >= order.length) return;
+      order.splice(j, 0, order.splice(i, 1)[0]);
+      layout();
+    }
+    function onGrab(e, name, card) {
+      if (locked || e.target.closest("button")) return;   // let ▲▼ work; no drag once solved
+      if (e.button !== undefined && e.button !== 0) return; // left / primary only
+      if (e.pointerType === "touch" && !e.target.closest(".g-grip")) return; // mobile: grip only, so the page can still scroll
+      e.preventDefault();
+      held = card; heldName = name;
+      listTop = list.getBoundingClientRect().top;
+      grabDY = e.clientY - card.getBoundingClientRect().top;
+      card.classList.add("dragging");
+      try { card.setPointerCapture(e.pointerId); } catch (_) {}
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onDrop, { once: true });
+      window.addEventListener("pointercancel", onDrop, { once: true });
+    }
+    function onMove(e) {
+      if (!held) return;
+      const maxY = (order.length - 1) * step;
+      let y = Math.max(0, Math.min(maxY, e.clientY - grabDY - listTop));
+      held.style.transform = `translateY(${y}px)`;         // held tracks cursor, no transition
+      const desired = Math.max(0, Math.min(order.length - 1, Math.round(y / step)));
+      const cur = order.indexOf(heldName);
+      if (desired !== cur) {                                // live re-order the instant a slot is crossed
+        order.splice(desired, 0, order.splice(cur, 1)[0]);
+        layout();
+      }
+    }
+    function onDrop() {
+      if (!held) return;
+      window.removeEventListener("pointermove", onMove);
+      const cur = order.indexOf(heldName);
+      held.classList.remove("dragging");
+      held.style.transform = "";                            // hand back to stylesheet (var --ty)
+      held.style.setProperty("--ty", (cur * step) + "px");
+      held = heldName = null;
+    }
+    function finalizeOrder() {      // solved → return to normal flow so the snap animation is clean
+      locked = true;
+      list.classList.remove("abs");
+      list.style.height = "";
+      order.forEach((name, i) => {
+        const el = nodes[name];
+        el.style.transform = ""; el.style.removeProperty("--ty");
+        list.appendChild(el);                                // reinsert in solved order
+        setTimeout(() => el.classList.add("correct", "snap"), i * 90);
+      });
+    }
+
+    function buildCard(name) {
+      const card = h("div", { class: "g-card", "data-name": name, tabindex: "0", role: "listitem",
+        "aria-roledescription": "sortable stage", "aria-label": name }, [
+        h("span", { class: "g-grip", "aria-hidden": "true", title: "drag to reorder" }, ["⠿"]),
+        h("span", { class: "h" }, [icons[name]]),
+        h("span", { class: "lbl" }, [name]),
+        h("span", { class: "ord" }, [
+          h("button", { class: "g-mini", title: "move up", "aria-label": `move ${name} up`,
+            onclick: (e) => { e.stopPropagation(); moveByButton(name, -1); } }, ["▲"]),
+          h("button", { class: "g-mini", title: "move down", "aria-label": `move ${name} down`,
+            onclick: (e) => { e.stopPropagation(); moveByButton(name, 1); } }, ["▼"])
+        ])
+      ]);
+      card.addEventListener("pointerdown", e => onGrab(e, name, card));
+      card.addEventListener("keydown", e => {
+        if (e.key === "ArrowUp") { e.preventDefault(); moveByButton(name, -1); nodes[name].focus(); }
+        if (e.key === "ArrowDown") { e.preventDefault(); moveByButton(name, 1); nodes[name].focus(); }
+      });
+      return card;
+    }
+    order.forEach(name => { const c = buildCard(name); nodes[name] = c; list.appendChild(c); });
+    requestAnimationFrame(measure);
 
     stage.append(
       h("div", { class: "g-room" }, [
@@ -197,18 +300,19 @@
         list,
         h("div", { class: "g-controls" }, [
           h("button", { class: "g-btn primary", onclick: () => {
+            if (locked) return;
             if (order.join() === correct.join()) {
-              list.querySelectorAll(".g-card").forEach((c, i) => setTimeout(() => { c.classList.add("correct", "snap"); }, i * 90));
+              clearWrong();
+              finalizeOrder();
               feedback("<b>✅ Pipeline Restored.</b> Climate data trains the habitat model; the model's maps drive the animal-movement step; that produces the Coexistence Risk Map. <b>Key 1 earned.</b>", true);
               awardKey(0);
               setTimeout(() => stage.querySelector(".g-room").appendChild(nextControls(0)), 500);
             } else {
-              list.classList.add(""); order.forEach(() => {});
-              list.querySelectorAll(".g-card").forEach(c => { c.classList.add("wrong"); setTimeout(() => c.classList.remove("wrong"), 450); });
-              state.wrong++; save();
-              feedback("Not quite — think about what has to exist <i>before</i> you can predict movement. What's the very first raw ingredient?", false);
+              Object.values(nodes).forEach(c => { c.classList.add("nudge"); setTimeout(() => c.classList.remove("nudge"), 500); });
+              showWrong();
             }
-          } }, ["Check order"])
+          } }, ["Check order"]),
+          inlineFb()
         ]),
         hintControl(0, "The forecast is the last step. It needs animal movement, which needs a habitat model, which needs the raw climate data first."),
         h("div", { class: "g-feedback", id: "gFb" }),
@@ -228,14 +332,13 @@
       b.addEventListener("click", () => {
         if (locked) return;
         if (name === "North") {
-          locked = true; b.classList.add("correct");
+          locked = true; b.classList.add("correct"); clearWrong();
           feedback("<b>Correct!</b> As temperatures rise, many European species shift <b>north</b> to stay within suitable climates — about 484 km on average by 2090. <b>Key 2 earned.</b>", true);
           awardKey(1); arrowsNorth();
           setTimeout(() => stage.querySelector(".g-room").appendChild(nextControls(1)), 500);
         } else {
           b.classList.add("wrong"); setTimeout(() => b.classList.remove("wrong"), 450);
-          state.wrong++; save();
-          feedback("That direction gets warmer, not cooler. Which way must a cool-loving species go as the climate heats up?", false);
+          showWrong();
         }
       });
       choices.appendChild(b);
@@ -249,6 +352,7 @@
       h("h3", {}, ["Predict the Migration"]),
       h("p", { class: "g-story" }, ["The climate is warming. Which direction will most European species move to stay comfortable?"]),
       compass, choices,
+      h("div", { class: "g-controls" }, [inlineFb()]),
       hintControl(1, "Cooler temperatures are found toward the poles. Europe's pole is at the top of the map."),
       h("div", { class: "g-feedback", id: "gFb" }),
       sideRail()
@@ -288,6 +392,7 @@
           const want = new Set(["Farmland", "City"]);
           const ok = picked.size === want.size && [...want].every(x => picked.has(x));
           if (ok) {
+            clearWrong();
             grid.querySelectorAll(".g-choice").forEach(b => {
               const n = b.textContent.trim(); if (want.has(n)) b.classList.add("correct");
             });
@@ -296,10 +401,10 @@
             setTimeout(() => stage.querySelector(".g-room").appendChild(nextControls(2)), 500);
           } else {
             grid.querySelectorAll(".g-choice").forEach(b => { b.classList.add("wrong"); setTimeout(() => b.classList.remove("wrong"), 450); });
-            state.wrong++; save();
-            feedback("Close — remember our 'human modification' layer. Which two places are most shaped by people?", false);
+            showWrong();
           }
-        } }, ["Submit selection"])
+        } }, ["Submit selection"]),
+        inlineFb()
       ]),
       hintControl(2, "Think about where the human-modification value is highest. Two of these are wild; two are dominated by people."),
       h("div", { class: "g-feedback", id: "gFb" }),
@@ -338,7 +443,7 @@
         if (d < best) { best = d; hit = hs; }
       }
       if (hit && best < 4.2) {
-        found.add(hit.name);
+        found.add(hit.name); clearWrong();
         // snap marker to the true hotspot location
         const tfx = (hit.lon - EXTENT[0]) / (EXTENT[1] - EXTENT[0]);
         const tfy = (EXTENT[3] - hit.lat) / (EXTENT[3] - EXTENT[2]);
@@ -353,8 +458,7 @@
       } else {
         const m = h("div", { class: "g-miss", style: `left:${fx * 100}%;top:${fy * 100}%` });
         map.appendChild(m); setTimeout(() => m.remove(), 600);
-        state.wrong++; save();
-        feedback("No major hotspot there. Look for the <b>brightest</b> clusters on the risk map.", false);
+        showWrong();
       }
     });
 
@@ -363,6 +467,7 @@
       h("h3", {}, ["Find the Future Hotspots"]),
       h("p", { class: "g-story" }, ["This is our Coexistence Risk Index — bright = high predicted conflict. Click the three biggest hotspots to confirm the model's forecast."]),
       map,
+      h("div", { class: "g-controls" }, [inlineFb()]),
       h("p", { class: "cap", style: "margin-top:10px" }, ["Tip: the brightest bands trace the Alps, the Carpathian arc, and the southern edge of Scandinavia."]),
       hintControl(3, "Look at the mountain arcs of central Europe and the forest fringe of southern Scandinavia — the brightest bands."),
       h("div", { class: "g-feedback", id: "gFb" }),
