@@ -179,7 +179,8 @@
       <div class="map-marks" id="fig3bMarks"></div>
     </div>
     <p class="sdm-readout" id="fig3bReadout">Hover the map to read conflict-corridor intensity; hover a ring for a ranked pinch-point.</p>
-    <p class="cap">Corridor intensity = movement current × human pressure. The <b>16 rings</b> mark the strongest pinch-points — exactly the circles in Figure 3b.</p>
+    <p class="formula">corridor = movement current × human pressure &nbsp;·&nbsp; current routed on resistance <b>R = base + α·(1 − suitability) + γ·(human modification)</b></p>
+    <p class="cap">The <b>16 rings</b> mark the strongest pinch-points — exactly the circles in Figure 3b.</p>
   </div>
 </section>
 
@@ -268,6 +269,8 @@
       <div class="map-marks" id="fig4aMarks"></div>
     </div>
     <p class="sdm-readout" id="fig4aReadout">Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed).</p>
+    <p class="formula"><b>CRI = z(friction) + 0.8·z(current × human) + 0.8·z(gain into human land)</b> &nbsp;·&nbsp; z = standardized (z-score)</p>
+    <p class="cap">Labels name the brightest clusters. Some coastal/island bright spots (e.g. Scotland) are over-water transport artefacts — see the caveat above.</p>
   </div>
 
   <div class="viz-row">
@@ -282,6 +285,7 @@
       <div class="viz-head"><h4>Interactive · Figure 4d — risk decomposition</h4>
         <span class="hint">hover a cell for the exact value</span></div>
       <svg class="chart-svg" id="fig4dChart" viewBox="0 0 560 470" role="img" aria-label="Per-species risk decomposition heatmap"></svg>
+      <p class="formula">colour = z-score across species &nbsp;·&nbsp; <b>z = (value − mean) ÷ standard deviation</b></p>
     </div>
   </div>
 

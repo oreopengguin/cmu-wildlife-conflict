@@ -44,6 +44,11 @@ def panel_a(ax, A):
     FS.map_axes(ax, lons, lats)
     FS.cbar(ax.figure, im, ax, "Coexistence Risk Index (z)")
     ax.set_title("Emergent human–wildlife conflict risk (2081–2100)", loc="left")
+    ax.text(0.015, 0.02,
+            "CRI = z(friction) + 0.8·z(current × human) + 0.8·z(gain into human land)\n"
+            "z = standardized (z-score)",
+            transform=ax.transAxes, va="bottom", ha="left", fontsize=5.0, color=FS.INK,
+            bbox=dict(boxstyle="round,pad=0.3", fc="white", ec=FS.FAINT, lw=0.4, alpha=0.72))
 
 
 def panel_b(ax, A):
@@ -105,8 +110,14 @@ def panel_c(ax, A):
     obs = assoc(fr, label)
     rng = np.random.default_rng(1)
     null = np.array([assoc(fr, rng.permutation(label)) for _ in range(2000)])
-    ax.hist(null, bins=40, color="#c7ccd4", edgecolor="white", linewidth=0.3)
-    ax.axvline(obs, color="#d64545", lw=2.0)
+    ax.hist(null, bins=40, color="#c7ccd4", edgecolor="white", linewidth=0.3,
+            label="null (label-permuted)")
+    ax.axvline(obs, color="#d64545", lw=3.2, label="observed", solid_capstyle="round")
+    ax.annotate("observed", xy=(obs, 0.5), xytext=(obs - 0.03, 0.63),
+                xycoords=ax.get_xaxis_transform(), textcoords=ax.get_xaxis_transform(),
+                fontsize=6.6, color="#d64545", fontweight="bold", ha="right",
+                arrowprops=dict(arrowstyle="->", color="#d64545", lw=1.0))
+    ax.legend(loc="upper left", fontsize=6.4, frameon=False)
     p = (np.sum(null >= obs) + 1) / (len(null) + 1)
     ax.text(0.96, 0.94, f"observed = {obs:.2f}\npermutation p = {p:.3g}\n"
             f"({int(label.sum())} interface cells)",

@@ -278,10 +278,10 @@
       const pin = document.createElement("div");
       pin.className = "pin"; pin.style.left = fx * 100 + "%"; pin.style.top = fy * 100 + "%";
       pin.setAttribute("tabindex", "0"); pin.setAttribute("role", "img");
-      pin.setAttribute("aria-label", `Pinch-point rank ${c.rank}, corridor intensity ${c.intensity}`);
+      pin.setAttribute("aria-label", `Pinch-point rank ${c.rank}, ${c.place || ""}, corridor intensity ${c.intensity}`);
       pin.innerHTML = `<span class="rk">${c.rank}</span>`;
       pin.addEventListener("mousemove", e => { e.stopPropagation(); pin.classList.add("on");
-        tip.show(`<span class="tt-t">Pinch-point #${c.rank}</span>${c.lat.toFixed(1)}°N, ${c.lon.toFixed(1)}°E<br>corridor intensity <b>${c.intensity}</b> · ${c.rel}% of the p97 scale`, e.clientX, e.clientY); });
+        tip.show(`<span class="tt-t">Pinch-point #${c.rank}${c.place ? " · " + c.place : ""}</span>${c.lat.toFixed(1)}°N, ${c.lon.toFixed(1)}°E<br>corridor intensity <b>${c.intensity}</b> · ${c.rel}% of the p97 scale`, e.clientX, e.clientY); });
       pin.addEventListener("mouseleave", () => { pin.classList.remove("on"); tip.hide(); });
       marks.appendChild(pin);
     });
@@ -313,6 +313,21 @@
       readout.innerHTML = `At ${lat.toFixed(1)}°N, ${lon.toFixed(1)}°E · relative Coexistence Risk ≈ <b>${v}/100</b> (${band}).`;
     });
     stage.addEventListener("mouseleave", () => { readout.textContent = "Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed)."; });
+  }
+
+  /* ===================== FIG 4A labels — named bright clusters ===================== */
+  function fig4aLabels(data) {
+    const marks = document.getElementById("fig4aMarks"); if (!marks) return;
+    const E = data.extent || [-12, 40, 34, 72];
+    marks.innerHTML = "";
+    for (const l of data.labels) {
+      const fx = (l.lon - E[0]) / (E[1] - E[0]), fy = (E[3] - l.lat) / (E[3] - E[2]);
+      const dot = document.createElement("div"); dot.className = "map-dot";
+      dot.style.left = fx * 100 + "%"; dot.style.top = fy * 100 + "%"; marks.appendChild(dot);
+      const lab = document.createElement("div"); lab.className = "map-label";
+      lab.style.left = fx * 100 + "%"; lab.style.top = fy * 100 + "%"; lab.textContent = l.name;
+      marks.appendChild(lab);
+    }
   }
 
   /* ===================== FIG 4B — predicted vs observed shift ===================== */
@@ -393,6 +408,7 @@
       j("fig3b").then(fig3b).catch(e => console.error("fig3b", e));
       j("fig4d").then(fig4d).catch(e => console.error("fig4d", e));
       j("risk_grid").then(fig4a).catch(e => console.error("fig4a", e));
+      j("fig4a").then(fig4aLabels).catch(e => console.error("fig4a labels", e));
     })
     .catch(err => { console.error("chart data load failed", err); frontiers(); });
 })();

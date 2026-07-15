@@ -17,6 +17,7 @@ from sklearn.decomposition import PCA
 import config as C
 import figstyle as FS
 import figdata as FD
+import geolabels as GL
 
 WEB = C.ROOT / "website"
 DATA = WEB / "assets" / "data"
@@ -273,16 +274,48 @@ def export_fig3b(A):
     circles = []
     for rank, k in enumerate(order, 1):
         yy, xx = int(ys[k]), int(xs[k])
-        circles.append({"lon": round(float(lons[xx]), 2), "lat": round(float(lats[yy]), 2),
+        la, lo = float(lats[yy]), float(lons[xx])
+        circles.append({"lon": round(lo, 2), "lat": round(la, 2),
                         "intensity": round(float(corridor[yy, xx]), 3),
                         "rel": round(float(corridor[yy, xx] / (vmax + 1e-9) * 100)),
-                        "rank": rank})
+                        "rank": rank, "place": GL.place_label(la, lo)})
     out = {"extent": [float(lons[0]), float(lons[-1]), float(lats[-1]), float(lats[0])],
            "coarse_shape": list(cm.shape), "mask": _b64_u8(cm.ravel()),
            "grid": _b64_u8(np.round(ccv.ravel() * 100)), "vmax": round(vmax, 3),
            "circles": circles}
     (DATA / "fig3b.json").write_text(json.dumps(out))
     print(f"wrote fig3b.json ({len(circles)} pinch-points) + corridor_map.png")
+
+
+def export_fig4a(A):
+    """Named bright clusters on the CRI map — declustered local maxima of the
+    committed CRI field, each labelled by landmark / nearest city / region."""
+    from scipy.ndimage import maximum_filter
+    mask = A["mask"]; cri = A["CRI"]; lons = A["lons"]; lats = A["lats"]
+    LON, LAT = np.meshgrid(lons, lats)
+    cn = np.where(mask & np.isfinite(cri), cri, -1e9)
+    loc = maximum_filter(cn, size=9)
+    v = cri[mask & np.isfinite(cri)]
+    thr = float(np.percentile(v, 92))
+    ys, xs = np.where((cn == loc) & (cn > thr))
+    vals = cn[ys, xs]
+    order = np.argsort(vals)[::-1]
+    labels, kept = [], []
+    for i in order:
+        la, lo = float(LAT[ys[i], xs[i]]), float(LON[ys[i], xs[i]])
+        if any(GL._haversine_km(la, lo, k[0], k[1]) < 230 for k in kept):
+            continue                                   # decluster (>=230 km apart)
+        name = GL.map_label(la, lo)
+        if any(l["name"] == name for l in labels):     # avoid duplicate names
+            continue
+        kept.append((la, lo))
+        labels.append({"name": name, "lon": round(lo, 2), "lat": round(la, 2),
+                       "cri": round(float(vals[i]), 1)})
+        if len(labels) >= 11:
+            break
+    extent = [float(lons[0]), float(lons[-1]), float(lats[-1]), float(lats[0])]
+    (DATA / "fig4a.json").write_text(json.dumps({"extent": extent, "labels": labels}))
+    print(f"wrote fig4a.json ({len(labels)} bright-cluster labels)")
 
 
 def export_fig4d(A):
@@ -332,6 +365,7 @@ def main():
     export_risk(A)
     export_fig2c(A)
     export_fig3b(A)
+    export_fig4a(A)
     export_fig4d(A)
     copy_figures()
     print("== web export complete ==")

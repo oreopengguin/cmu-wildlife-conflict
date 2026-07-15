@@ -343,9 +343,12 @@ retired (the old `gh-pages` branch was deleted).
   + hover **spotlight**), the **skill dot-plot**, the **6 future-research cards** (`FRONTIERS`
   array here), **and five data-driven figure recreations with element-specific hover**:
   `fig2c` (species shift-vs-latitude lines → species + shift@lat), `fig3b` (corridor map +
-  16 pinch-point rings → rank/location/intensity, + pixel-hover), `fig4a` (CRI map pixel-hover),
-  `fig4b` (predicted-vs-observed scatter → per-species values), `fig4d` (risk-decomposition
-  heatmap → per-cell value + z). Sets `window.GOC.species` and fires `goc-data-ready`.
+  16 pinch-point rings → rank + **place label** e.g. "near Warsaw, Poland" + intensity, + pixel-
+  hover), `fig4a` (CRI map pixel-hover + **named bright-cluster labels** overlaid from
+  `fig4a.json`), `fig4b` (predicted-vs-observed scatter → per-species values), `fig4d` (risk-
+  decomposition heatmap → per-cell value + z). Sets `window.GOC.species` and fires
+  `goc-data-ready`. Place/landmark/region names come from `src/geolabels.py` (public geographic
+  facts, no download) — used only to annotate real committed coordinates.
 - `assets/js/main.js` — theme toggle, hero flow-field, scroll-reveal, shared tooltip, **and**
   the interactive **pipeline strip** (`#pipeStrip`, hover/tap a stage), **stat count-up** on
   scroll, **nav scroll-spy**, and **figure panel-hover** (any `.figure[data-panels]` — hovering
@@ -360,7 +363,8 @@ retired (the old `gh-pages` branch was deleted).
 - `assets/data/*.json` — REAL exported data (from `export_web.py`). `meta.json` (species +
   key results), `skill.json`, `niche.json` (bioclim-PCA KDE density **contours**, Fig-1B-matched),
 `fig2c.json` (per-species shift-vs-latitude lines), `fig3b.json` (corridor coarse grid + 16
-pinch-point circles; paired with `img/corridor_map.png`), `fig4d.json` (per-species decomposition
+pinch-point circles w/ `place` labels; paired with `img/corridor_map.png`), `fig4a.json`
+(named CRI bright-cluster labels + extent), `fig4d.json` (per-species decomposition
 matrix), `sdm_grids.json` (coarse suitability
   for hover, base64), `risk_grid.json` (coarse CRI).
 - `assets/img/` — figure JPGs, `risk_map.png` (clean CRI map for the game), `sdm/*.png`.

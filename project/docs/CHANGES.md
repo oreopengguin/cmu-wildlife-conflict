@@ -162,9 +162,41 @@ output; nothing is invented.
 All new exports are produced by `src/export_web.py` (`export_fig2c`, `export_fig3b`, `export_fig4d`)
 and are regenerable via `run_pipeline.sh`; `verify.sh` checks the new assets.
 
+## Figures & interactive panels — pass 5 (readability, place labels, formulas)
+
+No numerical result changed; every value is still committed pipeline output. City,
+region and landmark names are public geographic facts used only to *annotate* real
+coordinates (`src/geolabels.py`), not data.
+
+- **Interactive Fig 3b — city labels.** Each pinch-point circle now names the nearest
+  well-known city + country when within 100 km (e.g. "near Warsaw, Poland"; #1 is
+  "near Saint Petersburg, Russia"), else the cardinal region of the containing country.
+  Stored per-circle as `place` in `fig3b.json` and shown in the hover tooltip.
+- **Interactive Fig 4a — bright-part labels.** 11 declustered CRI bright clusters are
+  labelled on the map by landmark / nearest city / region (`fig4a.json`), e.g. the Alps,
+  Saint Petersburg, Minsk, Kyiv, Istanbul, the Suwałki Gap, the Kola Peninsula. A footnote
+  flags that some coastal/island bright spots (e.g. Scotland) are over-water artefacts.
+- **Fig 3c — readability redesign.** Rebuilt as a joint plot: main scatter now uses two
+  colourblind-safe colours (present = blue, future = orange) for the *epoch* and two marker
+  *shapes* (H₀ circle, H₁ triangle) instead of four similar colours; **birth/death marginal
+  density strips** ("heat maps in sections around the graph") were added; and the legend was
+  moved into the clear top-right corner (previously buried in the point cloud).
+- **Fig 3d (persistence landscapes) — bolder lines.** Present/future envelopes are now bold
+  (blue/orange), deeper layers de-emphasised, so the present→future simplification is legible
+  at web size. **Fig 4c** permutation line thickened and explicitly labelled ("observed" with
+  an arrow + legend).
+- **Formulas on formula-derived graphs** (subtle text in blank space): landscape resistance
+  `R = base + α·(1 − suitability) + γ·(human modification)` on Fig 3a & 3b (static + interactive);
+  `CRI = z(friction) + 0.8·z(current × human) + 0.8·z(gain into human land)` on Fig 4a
+  (static + interactive); `z = (value − mean) ÷ standard deviation` on the Fig 4d heatmap.
+  Formulas judged too advanced for a brief explanation (the friction gradient ⟨T,∇H⟩₊ and the
+  Wasserstein/great-circle range shift) were deliberately omitted.
+
 ## Reproducibility
 
-- `src/export_web.py` regenerates all website data/images from committed results.
+- `src/export_web.py` regenerates all website data/images from committed results
+  (`export_fig3b` now adds `place`; new `export_fig4a` writes the bright-cluster labels;
+  `src/geolabels.py` holds the public city/landmark/region reference data).
 - `run_pipeline.sh` now regenerates the new figure and web assets.
 - The legacy single-file `build_site.py` is retained for reference but is no longer
   the site source of truth.
