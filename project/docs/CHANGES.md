@@ -200,6 +200,34 @@ coordinates (`src/geolabels.py`), not data.
   Formulas judged too advanced for a brief explanation (the friction gradient ⟨T,∇H⟩₊ and the
   Wasserstein/great-circle range shift) were deliberately omitted.
 
+## Figures & interactive panels — pass 6 (Fig 3c/3d revert; interactive 4b/4d removed)
+
+No numerical result changed. At the owner's request this pass **reverts two pass-5
+figure redesigns** and **removes two interactive website panels** to reduce visual
+clutter and cognitive load. Nothing was invented, inflated, or cherry-picked; every
+value still traces to the same committed pipeline output.
+
+- **Fig 3c reverted to a single-axis persistence diagram.** The pass-5 "joint plot"
+  (birth/death marginal-density strips + a nested sub-gridspec) was removed, returning
+  to one scatter axis. **Kept from pass 5:** the two-colour Okabe–Ito epoch scheme
+  (present = blue, future = orange) with marker shapes encoding the homology dimension
+  (H₀ = circle, H₁ = triangle), and the legend moved to the clear top-right corner.
+  Regenerated `figure3_connectivity_topology` PNG/PDF + web JPG from the same committed
+  diagrams — the plotted points are identical.
+- **Fig 3d reverted to uniform layered lines.** The pass-5 bold-primary-envelope /
+  de-emphasised-deeper-layers treatment was removed, restoring the original uniform line
+  weight, legend size and annotation placement. **Kept from pass 5:** the blue/orange
+  epoch colours.
+- **Interactive Figure 4b and 4d removed** from the website (the predicted-vs-observed
+  scatter and the per-species risk-decomposition heatmap). The `fig4b`/`fig4d` renderers
+  and their boot calls were deleted from `assets/js/charts.js`, the HTML panels and the
+  now-unused `.viz-row` CSS rule removed, `export_fig4d` dropped from `export_web.py`, and
+  `assets/data/fig4d.json` deleted. **The static Figure 4 image (all four panels a–d) and
+  the interactive Figure 4a risk-map hover are unchanged** — the same predicted-vs-observed
+  scatter and per-species decomposition remain visible as static panels b and d of the
+  flagship figure, so no information was lost. `verify.sh` updated accordingly (no longer
+  checks `fig4d.json`; now 40 checks, 0 failed).
+
 ## Reproducibility
 
 - `src/export_web.py` regenerates all website data/images from committed results

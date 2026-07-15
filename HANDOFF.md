@@ -7,7 +7,7 @@
 > **Keep this document updated after any future change** (there is a maintenance
 > checklist at the bottom).
 
-Last updated: 2026-07-14. Repo: `https://github.com/oreopengguin/cmu-wildlife-conflict`
+Last updated: 2026-07-15. Repo: `https://github.com/oreopengguin/cmu-wildlife-conflict`
 Live site: `https://cmu-wildlife-conflict.vercel.app/`
 This file **is committed to the repo** (at the repo root), so it travels with a fresh clone.
 It was validated by a from-scratch simulated handoff (fresh AI context, no chat history) that
@@ -337,18 +337,19 @@ retired (the old `gh-pages` branch was deleted).
   "poleward field" hero canvas, IntersectionObserver scroll-reveal, `window.GOC.tip`
   (shared tooltip) + `window.GOC.cssVar`.
 - `assets/js/charts.js` — fetches `meta.json`, `skill.json`, `niche.json` (primary) then
-  `fig2c.json`, `fig3b.json`, `fig4d.json`, `risk_grid.json` (secondary, loaded independently).
+  `fig2c.json`, `fig3b.json`, `risk_grid.json`, `fig4a.json` (secondary, loaded independently).
   Renders the **interactive niche SVG** (Gaussian-KDE **density contours matching Fig 1B** —
   polylines in `niche.json.species[*].contours`, level 0.4·max — + shape markers + toggle legend
   + hover **spotlight**), the **skill dot-plot**, the **6 future-research cards** (`FRONTIERS`
-  array here), **and five data-driven figure recreations with element-specific hover**:
+  array here), **and three data-driven figure recreations with element-specific hover**:
   `fig2c` (species shift-vs-latitude lines → species + shift@lat), `fig3b` (corridor map +
   16 pinch-point rings → rank + **place label** e.g. "near Warsaw, Poland" + intensity, + pixel-
-  hover), `fig4a` (CRI map pixel-hover + **named bright-cluster labels** overlaid from
-  `fig4a.json`), `fig4b` (predicted-vs-observed scatter → per-species values), `fig4d` (risk-
-  decomposition heatmap → per-cell value + z). Sets `window.GOC.species` and fires
-  `goc-data-ready`. Place/landmark/region names come from `src/geolabels.py` (public geographic
-  facts, no download) — used only to annotate real committed coordinates.
+  hover), and `fig4a` (CRI map pixel-hover + **named bright-cluster labels** overlaid from
+  `fig4a.json`). *(The interactive `fig4b` predicted-vs-observed scatter and `fig4d` risk-
+  decomposition heatmap were removed in pass 6 — those panels still exist as static panels b/d of
+  the flagship Figure 4 JPG.)* Sets `window.GOC.species` and fires `goc-data-ready`.
+  Place/landmark/region names come from `src/geolabels.py` (public geographic facts, no download)
+  — used only to annotate real committed coordinates.
 - `assets/js/main.js` — theme toggle, hero flow-field, scroll-reveal, shared tooltip, **and**
   the interactive **pipeline strip** (`#pipeStrip`, hover/tap a stage), **stat count-up** on
   scroll, **nav scroll-spy**, and **figure panel-hover** (any `.figure[data-panels]` — hovering
@@ -365,8 +366,8 @@ retired (the old `gh-pages` branch was deleted).
 `fig2c.json` (per-species shift-vs-latitude lines), `fig3b.json` (corridor coarse grid + 16
 pinch-point circles w/ `place` labels; paired with `img/corridor_map.png`), `fig4a.json`
 (named CRI bright-cluster labels + extent; `export_fig4a` filters out domain-edge cells and
-lone spikes — a peak is only labelled if its 150 km neighbourhood mean CRI > 0.4), `fig4d.json` (per-species decomposition
-matrix), `sdm_grids.json` (coarse suitability
+lone spikes — a peak is only labelled if its 150 km neighbourhood mean CRI > 0.4),
+`sdm_grids.json` (coarse suitability
   for hover, base64), `risk_grid.json` (coarse CRI).
 - `assets/img/` — figure JPGs, `risk_map.png` (clean CRI map for the game), `sdm/*.png`.
 

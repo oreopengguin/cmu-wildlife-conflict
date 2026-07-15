@@ -73,77 +73,47 @@ def panel_b(ax, A):
 _BLUE, _ORANGE = "#0072B2", "#D55E00"
 
 
-def panel_c(fig, cell, A):
-    """Persistence diagram as a joint plot: main scatter (colour = epoch, shape =
-    homology dimension) with birth/death marginal-density strips ("heat maps in
-    sections around the graph") and the legend tucked in the clear top corner."""
+def panel_c(ax, A):
+    """Persistence diagram (single scatter): colour encodes the epoch
+    (present = blue, future = orange) and marker shape the homology dimension
+    (H0 patches = circle, H1 loops = triangle); the legend sits in the clear
+    top-right corner."""
     from matplotlib.lines import Line2D
-    from scipy.stats import gaussian_kde
-
-    def bd(d, minpers=0.008):
+    dP0 = A["comm_pdiagP0"]; dF0 = A["comm_pdiagF0"]
+    dP1 = A["comm_pdiagP1"]; dF1 = A["comm_pdiagF1"]
+    # superlevel-set convention: a feature is born at HIGH suitability (its
+    # peak) and dies at a LOWER value (merge) -> birth > death, below diagonal.
+    def sc(d, color, marker, s=16, minpers=0.008):
         if len(d) == 0:
-            return np.zeros(0), np.zeros(0)
-        b = np.maximum(d[:, 0], d[:, 1]); dd = np.minimum(d[:, 0], d[:, 1])
-        keep = (b - dd) > minpers
-        return b[keep], dd[keep]
-    pP0b, pP0d = bd(A["comm_pdiagP0"]); pP1b, pP1d = bd(A["comm_pdiagP1"])
-    fP0b, fP0d = bd(A["comm_pdiagF0"]); fP1b, fP1d = bd(A["comm_pdiagF1"])
-    presb = np.concatenate([pP0b, pP1b]); presd = np.concatenate([pP0d, pP1d])
-    futb = np.concatenate([fP0b, fP1b]); futd = np.concatenate([fP0d, fP1d])
-    allv = np.concatenate([presb, presd, futb, futd])
-    hi = np.percentile(allv, 99.5) if len(allv) else 0.25
-
-    inner = cell.subgridspec(2, 2, width_ratios=[4, 1.15], height_ratios=[1.15, 4],
-                             wspace=0.05, hspace=0.05)
-    axm = fig.add_subplot(inner[1, 0])
-    axt = fig.add_subplot(inner[0, 0], sharex=axm)
-    axr = fig.add_subplot(inner[1, 1], sharey=axm)
-    axl = fig.add_subplot(inner[0, 1]); axl.axis("off")
-
-    axm.plot([0, hi], [0, hi], color=FS.FAINT, lw=0.9, ls="--", zorder=0)
-    def sc(b, d, color, marker):
-        axm.scatter(b, d, s=12, facecolor=FS.to_rgba(color, 0.28),
-                    edgecolor=FS.to_rgba(color, 0.75), linewidth=0.4,
-                    marker=marker, rasterized=True, zorder=2)
-    sc(pP0b, pP0d, _BLUE, "o"); sc(pP1b, pP1d, _BLUE, "^")
-    sc(fP0b, fP0d, _ORANGE, "o"); sc(fP1b, fP1d, _ORANGE, "^")
-    axm.set_xlim(-0.006, hi * 1.03); axm.set_ylim(-0.006, hi * 1.03)
-    axm.set_aspect("equal")
-    axm.set_xlabel("birth — suitability at patch peak")
-    axm.set_ylabel("death — suitability at merge")
-    axm.text(0.035, 0.97, "features far below the diagonal\n= persistent habitat cores",
-             transform=axm.transAxes, va="top", ha="left", fontsize=6, color=FS.MUTE)
-
-    xs = np.linspace(0, hi, 220)
-    def kde_fill(ax, data, color, vertical=False):
-        if len(data) < 5:
             return
-        dens = gaussian_kde(data)(xs)
-        if vertical:
-            ax.fill_betweenx(xs, 0, dens, color=color, alpha=0.20)
-            ax.plot(dens, xs, color=color, lw=1.5)
-        else:
-            ax.fill_between(xs, 0, dens, color=color, alpha=0.20)
-            ax.plot(xs, dens, color=color, lw=1.5)
-    kde_fill(axt, presb, _BLUE); kde_fill(axt, futb, _ORANGE)
-    kde_fill(axr, presd, _BLUE, vertical=True); kde_fill(axr, futd, _ORANGE, vertical=True)
-    for a in (axt, axr):
-        a.tick_params(labelbottom=False, labelleft=False, length=0)
-        for s in a.spines.values():
-            s.set_visible(False)
-    axt.set_ylabel("birth\ndensity", fontsize=5.6, color=FS.MUTE, rotation=0,
-                   ha="right", va="center", labelpad=2)
-    axr.set_xlabel("death\ndensity", fontsize=5.6, color=FS.MUTE)
-
-    handles = [Line2D([0], [0], marker="s", ls="none", mfc=_BLUE, mec="none", ms=8, label="present"),
-               Line2D([0], [0], marker="s", ls="none", mfc=_ORANGE, mec="none", ms=8, label="future"),
+        birth = np.maximum(d[:, 0], d[:, 1]); death = np.minimum(d[:, 0], d[:, 1])
+        pers = birth - death
+        keep = pers > minpers
+        ax.scatter(birth[keep], death[keep], s=s,
+                   facecolor=FS.to_rgba(color, 0.5), edgecolor=color,
+                   linewidth=0.5, marker=marker, rasterized=True)
+    # find data range for zoom
+    allv = np.concatenate([d[:, :2].ravel() for d in (dP0, dF0, dP1, dF1)
+                           if len(d)])
+    hi = np.nanpercentile(allv, 99.5) if len(allv) else 0.3
+    ax.plot([0, hi], [0, hi], color=FS.FAINT, lw=0.8, ls="--", zorder=0)
+    sc(dP0, _BLUE, "o")
+    sc(dF0, _ORANGE, "o")
+    sc(dP1, _BLUE, "^", s=24)
+    sc(dF1, _ORANGE, "^", s=24)
+    ax.set_xlabel("birth — suitability at patch peak")
+    ax.set_ylabel("death — suitability at merge")
+    ax.set_title("Persistence diagram: shape of the range", loc="left")
+    handles = [Line2D([0], [0], marker="s", ls="none", mfc=_BLUE, mec="none", ms=7, label="present"),
+               Line2D([0], [0], marker="s", ls="none", mfc=_ORANGE, mec="none", ms=7, label="future"),
                Line2D([0], [0], marker="o", ls="none", mfc="none", mec=FS.INK, ms=6, label="H$_0$ patches"),
                Line2D([0], [0], marker="^", ls="none", mfc="none", mec=FS.INK, ms=6, label="H$_1$ loops")]
-    axl.legend(handles=handles, loc="center", fontsize=6.0, handlelength=1.0,
-               handletextpad=0.4, labelspacing=0.55, borderpad=0.2, frameon=False)
-    axt.set_title("Persistence diagram: shape of the range", loc="left", fontsize=9.5,
-                  fontweight="bold")
-    FS.panel_label(axt, "c")
+    ax.legend(handles=handles, loc="upper right", fontsize=6.2,
+              handletextpad=0.4, labelspacing=0.4, borderpad=0.35, framealpha=0.85)
+    ax.set_xlim(-0.01, hi * 1.05); ax.set_ylim(-0.01, hi * 1.05)
+    ax.set_aspect("equal")
+    ax.text(0.03, 0.96, "features far below the diagonal\n= persistent habitat cores",
+            transform=ax.transAxes, va="top", fontsize=6.2, color=FS.MUTE)
 
 
 def panel_d(ax, A):
@@ -151,19 +121,18 @@ def panel_d(ax, A):
     dF0 = {0: A["comm_pdiagF0"], 1: A["comm_pdiagF1"]}
     xs, LP = TP.persistence_landscape(dP0, dim=0, n_layers=4)
     _, LF = TP.persistence_landscape(dF0, dim=0, n_layers=4)
-    # deeper layers first (light), then the bold primary envelope on top
-    for i in range(1, LP.shape[0]):
-        ax.plot(xs, LP[i], color=_BLUE, lw=1.0, alpha=0.32)
-        ax.plot(xs, LF[i], color=_ORANGE, lw=1.0, alpha=0.32)
-    ax.fill_between(xs, LP[0], color=_BLUE, alpha=0.11)
-    ax.fill_between(xs, LF[0], color=_ORANGE, alpha=0.11)
-    ax.plot(xs, LP[0], color=_BLUE, lw=2.8, label="present", solid_capstyle="round")
-    ax.plot(xs, LF[0], color=_ORANGE, lw=2.8, label="future", solid_capstyle="round")
+    for i in range(LP.shape[0]):
+        ax.plot(xs, LP[i], color=_BLUE, lw=1.1, alpha=0.85 - i * 0.15)
+        ax.plot(xs, LF[i], color=_ORANGE, lw=1.1, alpha=0.85 - i * 0.15, ls="-")
+    ax.fill_between(xs, LP[0], color=_BLUE, alpha=0.10)
+    ax.fill_between(xs, LF[0], color=_ORANGE, alpha=0.10)
+    ax.plot([], [], color=_BLUE, label="present")
+    ax.plot([], [], color=_ORANGE, label="future")
     ax.set_xlabel("suitability threshold")
     ax.set_ylabel(r"persistence landscape $\lambda_k$")
     ax.set_title("Topological simplification of habitat", loc="left")
-    ax.legend(loc="upper right", fontsize=7.6, handlelength=1.4)
-    ax.set_xlim(0, 0.32)
+    ax.legend(loc="upper right", fontsize=6.6)
+    ax.set_xlim(0, 0.32)               # zoom to where the features live
     s = FD.load_summary()["community"]
     fp = s["frag_present"]; ff = s["frag_future"]
     arw = r"$\rightarrow$"
@@ -171,7 +140,7 @@ def panel_d(ax, A):
            f"loops (H$_1$): {fp['n_loops']} {arw} {ff['n_loops']}\n"
            f"total persistence: {fp['total_persistence']:.2f} {arw} "
            f"{ff['total_persistence']:.2f}")
-    ax.text(0.03, 0.86, txt, transform=ax.transAxes, va="top", fontsize=6.6,
+    ax.text(0.03, 0.97, txt, transform=ax.transAxes, va="top", fontsize=6.6,
             color=FS.INK, bbox=dict(boxstyle="round,pad=0.4", fc="#f4f6f9",
                                     ec=FS.FAINT, lw=0.6))
 
@@ -183,7 +152,7 @@ def main():
                           left=0.055, right=0.965, top=0.93, bottom=0.06)
     axa = fig.add_subplot(gs[0, 0]); panel_a(axa, A); FS.panel_label(axa, "a")
     axb = fig.add_subplot(gs[0, 1]); panel_b(axb, A); FS.panel_label(axb, "b")
-    panel_c(fig, gs[1, 0], A)      # joint plot: builds its own sub-gridspec + "c" label
+    axc = fig.add_subplot(gs[1, 0]); panel_c(axc, A); FS.panel_label(axc, "c")
     axd = fig.add_subplot(gs[1, 1]); panel_d(axd, A); FS.panel_label(axd, "d")
     fig.suptitle("Figure 3  |  Spectral connectivity and persistent-homology of "
                  "forced redistribution", x=0.055, ha="left",

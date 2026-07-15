@@ -198,7 +198,6 @@
     const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
     const m = svg.getScreenCTM(); return m ? p.matrixTransform(m.inverse()) : { x: 0, y: 0 };
   }
-  const signed = v => (v > 0 ? "+" : "") + v;
 
   /* ===================== FIG 2C — species shift-vs-latitude ===================== */
   function fig2c(data) {
@@ -330,83 +329,18 @@
     }
   }
 
-  /* ===================== FIG 4B — predicted vs observed shift ===================== */
-  function fig4b(meta) {
-    const svg = document.getElementById("fig4bChart"); if (!svg) return;
-    const pts = meta.species.filter(s => s.obs_dlat != null).map(s => ({ ...s, x: s.obs_dlat, y: s.pred_dlat }));
-    if (!pts.length) return;
-    const W = 560, H = 470, M = { l: 56, r: 18, t: 20, b: 50 };
-    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
-    let lo = Math.min(...xs, ...ys, 0), hi = Math.max(...xs, ...ys, 0);
-    const pad = 0.12 * (hi - lo + 1e-9); lo -= pad; hi += pad;
-    const px = v => M.l + (v - lo) / (hi - lo) * (W - M.l - M.r);
-    const py = v => H - M.b - (v - lo) / (hi - lo) * (H - M.t - M.b);
-    svg.innerHTML = "";
-    svg.appendChild(el("line", { x1: px(0), y1: M.t, x2: px(0), y2: H - M.b, stroke: "var(--line)", "stroke-width": 1 }));
-    svg.appendChild(el("line", { x1: M.l, y1: py(0), x2: W - M.r, y2: py(0), stroke: "var(--line)", "stroke-width": 1 }));
-    svg.appendChild(el("line", { x1: px(lo), y1: py(lo), x2: px(hi), y2: py(hi), stroke: "var(--faint)", "stroke-width": 1.4, "stroke-dasharray": "5 4" }));
-    const t11 = el("text", { x: px(hi) - 4, y: py(hi) + 14, "text-anchor": "end", fill: "var(--slate)", "font-size": 10 }); t11.textContent = "1:1 (perfect prediction)"; svg.appendChild(t11);
-    const xl = el("text", { x: (M.l + W - M.r) / 2, y: H - 8, "text-anchor": "middle", fill: "var(--slate)", "font-size": 11.5 }); xl.textContent = "Observed Δlatitude (°)"; svg.appendChild(xl);
-    const yl = el("text", { x: 15, y: (M.t + H - M.b) / 2, "text-anchor": "middle", fill: "var(--slate)", "font-size": 11.5, transform: `rotate(-90 15 ${(M.t + H - M.b) / 2})` }); yl.textContent = "OT-predicted Δlatitude (°)"; svg.appendChild(yl);
-    for (const p of pts) {
-      const g = el("g", { tabindex: 0, role: "img", "aria-label": `${p.common} observed ${p.x} predicted ${p.y}` });
-      marker(g, p.marker, px(p.x), py(p.y), 7, p.color);
-      const note = p.key === "Canis lupus" ? "<br><i>recolonization-driven outlier</i>" : "";
-      const tt = e => tip.show(`<span class="tt-t">${p.common}</span>observed <b>${signed(p.x)}°</b> · predicted <b>${signed(p.y)}°</b>${note}`, e.clientX, e.clientY);
-      g.addEventListener("mousemove", tt); g.addEventListener("mouseleave", () => tip.hide());
-      g.addEventListener("focus", () => tip.show(`${p.common}: observed ${signed(p.x)}, predicted ${signed(p.y)}`, px(p.x) + 40, py(p.y) + 140)); g.addEventListener("blur", () => tip.hide());
-      svg.appendChild(g);
-    }
-    const r = meta.results || {};
-    const st = el("text", { x: M.l + 6, y: M.t + 10, fill: "var(--ink)", "font-size": 11, "font-weight": 600 });
-    st.textContent = `Spearman ρ = ${r.spearman} · Pearson r = ${r.pearson}`; svg.appendChild(st);
-  }
-
-  /* ===================== FIG 4D — per-species risk decomposition ===================== */
-  function fig4d(data) {
-    const svg = document.getElementById("fig4dChart"); if (!svg) return;
-    const sps = data.species, metrics = data.metrics, nR = sps.length, nC = metrics.length;
-    const W = 560, H = 470, M = { l: 104, r: 14, t: 78, b: 14 };
-    const cw = (W - M.l - M.r) / nC, ch = (H - M.t - M.b) / nR;
-    const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-    const NEG = [94, 60, 153], MID = [247, 247, 247], POS = [178, 24, 43];
-    const zcol = z => { if (z == null) return "var(--card2)"; const t = Math.max(-1, Math.min(1, z / 2));
-      const c = t < 0 ? mix(MID, NEG, -t) : mix(MID, POS, t); return `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`; };
-    svg.innerHTML = "";
-    metrics.forEach((mn, j) => {
-      const cx = M.l + cw * (j + 0.5);
-      const tx = el("text", { x: cx, y: M.t - 10, "text-anchor": "start", fill: "var(--slate)", "font-size": 10, transform: `rotate(-40 ${cx} ${M.t - 10})` }); tx.textContent = mn; svg.appendChild(tx);
-    });
-    sps.forEach((sp, i) => {
-      const ty = el("text", { x: M.l - 8, y: M.t + ch * (i + 0.5) + 3, "text-anchor": "end", fill: "var(--ink)", "font-size": 11 }); ty.textContent = sp.common; svg.appendChild(ty);
-      metrics.forEach((mn, j) => {
-        const z = sp.z[j], v = sp.vals[j], x = M.l + cw * j, y = M.t + ch * i;
-        const g = el("g", { tabindex: 0, role: "img", "aria-label": `${sp.common} ${mn} ${v}` });
-        g.appendChild(el("rect", { x: x + 1.5, y: y + 1.5, width: cw - 3, height: ch - 3, rx: 3, fill: zcol(z), stroke: "var(--card)", "stroke-width": 1 }));
-        const dark = z != null && Math.abs(z) > 1.1;
-        const vt = el("text", { x: x + cw / 2, y: y + ch / 2 + 3.5, "text-anchor": "middle", "font-size": 10.5, fill: dark ? "#fff" : "#17241f" });
-        vt.textContent = v == null ? "—" : (Math.abs(v) >= 10 ? Math.round(v) : v.toFixed(2)); g.appendChild(vt);
-        const tt = e => tip.show(`<span class="tt-t">${sp.common}</span>${mn}: <b>${v == null ? "n/a" : v}</b>${z == null ? "" : ` &nbsp;·&nbsp; z = ${signed(z)}`}`, e.clientX, e.clientY);
-        g.addEventListener("mousemove", tt); g.addEventListener("mouseleave", () => tip.hide());
-        g.addEventListener("focus", () => tip.show(`${sp.common} ${mn} ${v}`, x + cw, y + ch)); g.addEventListener("blur", () => tip.hide());
-        svg.appendChild(g);
-      });
-    });
-  }
-
   /* ===================== BOOT ===================== */
   const j = n => load(`assets/data/${n}.json`);
   Promise.all([j("meta"), j("skill"), j("niche")])
     .then(([meta, sk, nch]) => {
       window.GOC.species = meta.species;
       window.GOC.meta = meta;
-      niche(nch); skill(sk); frontiers(); fig4b(meta);
+      niche(nch); skill(sk); frontiers();
       window.dispatchEvent(new CustomEvent("goc-data-ready"));
       // secondary interactive panels — load independently so one failure can't
       // break the others or the primary charts
       j("fig2c").then(fig2c).catch(e => console.error("fig2c", e));
       j("fig3b").then(fig3b).catch(e => console.error("fig3b", e));
-      j("fig4d").then(fig4d).catch(e => console.error("fig4d", e));
       j("risk_grid").then(fig4a).catch(e => console.error("fig4a", e));
       j("fig4a").then(fig4aLabels).catch(e => console.error("fig4a labels", e));
     })

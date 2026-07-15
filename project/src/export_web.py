@@ -336,33 +336,6 @@ def export_fig4a(A):
     print(f"wrote fig4a.json ({len(labels)} bright-cluster labels)")
 
 
-def export_fig4d(A):
-    """Interactive Figure 4d: per-species risk decomposition — the exact five
-    signals fig4.py::panel_d tabulates (raw values + across-species z-scores)."""
-    s = FD.load_summary(); sps = FD.species_present(A)
-    labels = ["W-shift (km)", "Δpatches", "topo shift", "mean friction", "interface AUC"]
-    rows, M = [], []
-    for sp in sps:
-        r = s["species"][sp]
-        fr = A[f"friction__{sp}"]
-        mf = float(np.nanmean(fr[np.isfinite(fr) & (fr > 0)])) if np.isfinite(fr).any() else np.nan
-        vals = [float(r["W_shift_km"]),
-                float(r["frag_future"]["n_patches"] - r["frag_present"]["n_patches"]),
-                float(r["topo_change_W1"]), mf,
-                float(r["interface"]["auc_friction"]) if r["interface"] else np.nan]
-        M.append(vals)
-        rows.append({"key": sp, "common": C.SPECIES_COMMON[sp],
-                     "color": C.SPECIES_COLOR[sp], "marker": C.SPECIES_MARKER[sp]})
-    M = np.array(M, float)
-    Z = (M - np.nanmean(M, axis=0)) / (np.nanstd(M, axis=0) + 1e-9)
-    for i, rr in enumerate(rows):
-        rr["vals"] = [None if not np.isfinite(v) else round(float(v), 3) for v in M[i]]
-        rr["z"] = [None if not np.isfinite(z) else round(float(z), 2) for z in Z[i]]
-    out = {"metrics": labels, "species": rows}
-    (DATA / "fig4d.json").write_text(json.dumps(out))
-    print("wrote fig4d.json")
-
-
 def copy_figures():
     for n in ["figure1_framework", "figure2_transport",
               "figure3_connectivity_topology", "figure4_risk_validation",
@@ -384,7 +357,6 @@ def main():
     export_fig2c(A)
     export_fig3b(A)
     export_fig4a(A)
-    export_fig4d(A)
     copy_figures()
     print("== web export complete ==")
 
