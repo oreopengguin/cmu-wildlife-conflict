@@ -172,10 +172,18 @@ coordinates (`src/geolabels.py`), not data.
   well-known city + country when within 100 km (e.g. "near Warsaw, Poland"; #1 is
   "near Saint Petersburg, Russia"), else the cardinal region of the containing country.
   Stored per-circle as `place` in `fig3b.json` and shown in the hover tooltip.
-- **Interactive Fig 4a — bright-part labels.** 11 declustered CRI bright clusters are
-  labelled on the map by landmark / nearest city / region (`fig4a.json`), e.g. the Alps,
-  Saint Petersburg, Minsk, Kyiv, Istanbul, the Suwałki Gap, the Kola Peninsula. A footnote
-  flags that some coastal/island bright spots (e.g. Scotland) are over-water artefacts.
+- **Interactive Fig 4a — bright-part labels.** Declustered CRI bright clusters are labelled
+  on the map by landmark / nearest city / region (`fig4a.json`), e.g. the Alps, Saint
+  Petersburg, Minsk, Kyiv, Istanbul, the Suwałki Gap, Vitebsk, Berlin. A footnote flags that
+  some coastal bright spots (e.g. Scotland) are over-water artefacts.
+  - **Honesty fix (after review):** the first version labelled single-cell CRI maxima, which
+    let in **isolated spikes** — most glaringly *Oran*, a lone bright pixel whose ~150 km
+    surroundings average **CRI = −0.80** (below the domain mean of 0), driven by one
+    high-human-modification cell at the far southern (North-African) edge where the model
+    extrapolates. `export_fig4a` now requires each label to (a) sit **away from the domain
+    edge** and (b) have a genuinely bright **neighbourhood** (150 km area-mean CRI > 0.4), so
+    Oran, SW-Sweden, the Kola spike and the peripheral Rabat cluster are excluded; every
+    remaining label has above-average surroundings (area-mean +0.72 … +4.07).
 - **Fig 3c — readability redesign.** Rebuilt as a joint plot: main scatter now uses two
   colourblind-safe colours (present = blue, future = orange) for the *epoch* and two marker
   *shapes* (H₀ circle, H₁ triangle) instead of four similar colours; **birth/death marginal

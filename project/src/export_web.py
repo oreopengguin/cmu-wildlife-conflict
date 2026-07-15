@@ -293,16 +293,34 @@ def export_fig4a(A):
     from scipy.ndimage import maximum_filter
     mask = A["mask"]; cri = A["CRI"]; lons = A["lons"]; lats = A["lats"]
     LON, LAT = np.meshgrid(lons, lats)
-    cn = np.where(mask & np.isfinite(cri), cri, -1e9)
+    valid = mask & np.isfinite(cri)
+    cn = np.where(valid, cri, -1e9)
     loc = maximum_filter(cn, size=9)
-    v = cri[mask & np.isfinite(cri)]
+    v = cri[valid]
     thr = float(np.percentile(v, 92))
     ys, xs = np.where((cn == loc) & (cn > thr))
     vals = cn[ys, xs]
     order = np.argsort(vals)[::-1]
+
+    def area_mean(la, lo, km=150.0):
+        """Mean CRI within km of a point — a peak is only a genuine bright
+        cluster (not an isolated single-cell spike) if its surroundings are
+        also elevated."""
+        p1 = np.radians(la); dphi = np.radians(LAT - la); dl = np.radians(LON - lo)
+        a = np.sin(dphi / 2) ** 2 + np.cos(p1) * np.cos(np.radians(LAT)) * np.sin(dl / 2) ** 2
+        d = 2 * 6371.0 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
+        m = valid & (d <= km)
+        return float(np.nanmean(cri[m])) if m.any() else -1e9
+
     labels, kept = [], []
     for i in order:
         la, lo = float(LAT[ys[i], xs[i]]), float(LON[ys[i], xs[i]])
+        # skip cells near the domain edge (extrapolated / outside the European focus,
+        # e.g. the thin North-African strip) and lone spikes in otherwise-dim regions
+        if not (35.6 <= la <= 70.5 and -10.5 <= lo <= 38.5):
+            continue
+        if area_mean(la, lo) < 0.4:
+            continue
         if any(GL._haversine_km(la, lo, k[0], k[1]) < 230 for k in kept):
             continue                                   # decluster (>=230 km apart)
         name = GL.map_label(la, lo)

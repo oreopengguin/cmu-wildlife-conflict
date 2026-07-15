@@ -364,7 +364,8 @@ retired (the old `gh-pages` branch was deleted).
   key results), `skill.json`, `niche.json` (bioclim-PCA KDE density **contours**, Fig-1B-matched),
 `fig2c.json` (per-species shift-vs-latitude lines), `fig3b.json` (corridor coarse grid + 16
 pinch-point circles w/ `place` labels; paired with `img/corridor_map.png`), `fig4a.json`
-(named CRI bright-cluster labels + extent), `fig4d.json` (per-species decomposition
+(named CRI bright-cluster labels + extent; `export_fig4a` filters out domain-edge cells and
+lone spikes — a peak is only labelled if its 150 km neighbourhood mean CRI > 0.4), `fig4d.json` (per-species decomposition
 matrix), `sdm_grids.json` (coarse suitability
   for hover, base64), `risk_grid.json` (coarse CRI).
 - `assets/img/` — figure JPGs, `risk_map.png` (clean CRI map for the game), `sdm/*.png`.
