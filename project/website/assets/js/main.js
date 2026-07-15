@@ -92,11 +92,11 @@
     const desc = document.getElementById("pipeDesc");
     const nodes = [...strip.querySelectorAll(".pipe-node")];
     const TEXT = [
-      "We start from 57,838 open GBIF sightings — presence-only records of the seven conflict-prone taxa across Europe.",
-      "A from-scratch maximum-entropy model — its exact equivalent, a penalized Poisson point process — turns those records into present and future habitat-suitability maps.",
-      "Entropic optimal transport between the present and future maps gives a displacement field — where each patch of habitat must move — and the Coexistence Friction where it is pushed up the human-pressure gradient.",
-      "Spectral circuit theory routes that forced movement into corridors and pinch-points, while cubical persistent homology measures how the range fragments.",
-      "The three geometric signals fuse into a single Coexistence Risk Index — then face two independent tests on data the model never saw."
+      "We begin with 57,838 open-access GBIF observations, representing presence-only records for seven conflict-prone mammal species across Europe.",
+      "Using these observations, we built our habitat models from scratch using a maximum entropy approach, implemented through its mathematically equivalent formulation as a penalized Poisson point process. These models allow us to generate habitat suitability maps for both present-day and future climate conditions.",
+      "We then use entropic optimal transport to model how species redistribute as their habitats shift under climate change. This produces a displacement field that estimates where populations are likely to move, as well as a measure of Coexistence Friction, which captures the difficulty of moving through areas with increasing human pressure.",
+      "Next, we identify the routes wildlife is most likely to take during this redistribution process. Spectral circuit theory highlights important movement corridors and bottlenecks, while persistent homology measures how habitats become fragmented or remain connected over time.",
+      "Finally, we combine these geometric signals into a single Coexistence Risk Index that estimates where interactions between wildlife and people are most likely to occur. We then evaluate these predictions using independent datasets that were never seen during model development."
     ];
     let cur = -1, t = null;
     function set(i) {
