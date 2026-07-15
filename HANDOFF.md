@@ -277,6 +277,12 @@ Individual stages (`cd project/src && ../.venv/bin/python X.py`):
 16. `export_web.py` — exports REAL data → `website/assets/data/*.json` + renders per-species
     SDM map PNGs + the risk map PNG + copies figure JPGs. **Run this after any figure/result
     change to update the website.**
+16b. `species_cri.py` — **per-species Coexistence Risk**: runs the *same* recipe
+    (`connectivity.solve_current` + `risk.coexistence_risk`, weights 1.0/0.8/0.8) once per
+    species → `results/species_cri.npz`, `website/assets/img/cri/<key>.png`,
+    `website/assets/data/cri_species.json`. Drives the Community + 7-species **tabs on the
+    interactive Figure 4a** (handled in `charts.js::fig4a`). Note: per-species maps do NOT
+    average back to the community map (community aggregates suitability *before* the index).
 17. `build_site.py` — LEGACY single-file HTML generator, **no longer the site source** (kept
     for reference). The live site is the hand-authored multi-file `website/`.
 

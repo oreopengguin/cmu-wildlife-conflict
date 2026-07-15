@@ -19,5 +19,6 @@ for n in ['figure1_framework','figure2_transport','figure3_connectivity_topology
     im.resize((1600,int(h*1600/w)), Image.LANCZOS).save(f'../figures/web/{n}.jpg', quality=88, optimize=True)
 PYIMG
 echo "=== [8/8] export interactive website data + images ==="; $PY export_web.py
+echo "=== [8b] per-species Coexistence Risk maps ==="; $PY species_cri.py
 echo "=== DONE. figures in project/figures, interactive site in project/website ==="
 ls -lh ../figures

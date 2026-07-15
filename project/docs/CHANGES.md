@@ -228,8 +228,32 @@ value still traces to the same committed pipeline output.
   flagship figure, so no information was lost. `verify.sh` updated accordingly (no longer
   checks `fig4d.json`; now 40 checks, 0 failed).
 
+## Per-species Coexistence Risk (pass 4) — new analysis, same recipe
+
+Added **per-species CRI maps** so a viewer can see *which taxon drives each hotspot*.
+This is **new committed analysis**, run with the *identical* procedure as the community CRI —
+`connectivity.resistance_surface` + `connectivity.solve_current` for the per-species current,
+then `risk.coexistence_risk` with the same `(1.0, 0.8, 0.8)` weights and z-scoring — just run
+once per species instead of on the community-aggregated suitability.
+
+- New script `src/species_cri.py` → `results/species_cri.npz` (`cri__<species>` maps),
+  `website/assets/img/cri/<key>.png` (EMBER, per-species 3rd–99th percentile stretch, same
+  style as `risk_map.png`), and `website/assets/data/cri_species.json` (coarse per-species
+  grids for hover).
+- **Website:** the interactive Figure 4a gained a **Community + 7 species tab row** (reusing
+  the SDM viewer's `.chip` styling). Selecting a tab swaps the map image, the hover grid, and
+  the community labels; `assets/js/charts.js::fig4a` was generalised to hold multiple views.
+- **Honesty note stated on the site:** each per-species map is stretched to its own
+  percentile range (risk is *relative within the selected tab*), and because the community
+  index aggregates suitability *before* building the index, the 7 per-species maps **do not
+  average back** to the community map. No community value changed.
+- **Per-species peaks (from the committed grids):** Alps → **brown bear**; Baltic /
+  St. Petersburg → **wolf, lynx, roe deer, red fox**; Bosphorus/SE → **golden jackal, wild
+  boar**. `verify.sh` updated to check the new assets.
+
 ## Reproducibility
 
+- `src/species_cri.py` regenerates the per-species CRI maps + web assets from `analysis.npz`.
 - `src/export_web.py` regenerates all website data/images from committed results
   (`export_fig3b` now adds `place`; new `export_fig4a` writes the bright-cluster labels;
   `src/geolabels.py` holds the public city/landmark/region reference data).

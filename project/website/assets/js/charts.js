@@ -296,22 +296,75 @@
     stage.addEventListener("mouseleave", () => { readout.textContent = "Hover the map to read conflict-corridor intensity; hover a ring for a ranked pinch-point."; });
   }
 
-  /* ===================== FIG 4A — CRI map (reuses risk_grid) ===================== */
-  function fig4a(data) {
+  /* ===================== FIG 4A — CRI map, community + per-species tabs =========
+     `community` = risk_grid.json (all 7 taxa fused). `speciesData` = cri_species.json
+     (per-species coarse CRI grids). One hover handler reads the SELECTED grid; tabs
+     swap the image, the hover grid, and the community labels. */
+  function fig4a(community, speciesData) {
     const stage = document.getElementById("fig4aStage"); if (!stage) return;
     const readout = document.getElementById("fig4aReadout");
-    const [gh, gw] = data.coarse_shape, mask = b64ToU8(data.mask), cri = b64ToU8(data.cri), E = data.extent;
+    const img = document.getElementById("fig4aImg");
+    const marks = document.getElementById("fig4aMarks");
+    const chips = document.getElementById("fig4aChips");
+    const title = document.getElementById("fig4aTitle");
+    const DEFAULT = "Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed).";
+
+    // build a selectable view for the community and each species
+    const views = {};
+    views.__community = { name: "Community (all 7)", img: "assets/img/risk_map.png",
+      gh: community.coarse_shape[0], gw: community.coarse_shape[1],
+      mask: b64ToU8(community.mask), cri: b64ToU8(community.cri),
+      E: community.extent, labels: true };
+    if (speciesData) {
+      const cm = b64ToU8(speciesData.mask), [gh, gw] = speciesData.coarse_shape;
+      for (const sp of (window.GOC.species || [])) {
+        const d = speciesData.species[sp.key]; if (!d) continue;
+        views[sp.key] = { name: sp.common, img: `assets/img/cri/${sp.key.replace(/ /g, "_")}.png`,
+          gh, gw, mask: cm, cri: b64ToU8(d.cri), E: speciesData.extent, labels: false, color: sp.color };
+      }
+    }
+    let cur = views.__community;
+
+    function select(key) {
+      cur = views[key] || views.__community;
+      img.src = cur.img;
+      if (marks) marks.style.display = cur.labels ? "" : "none";
+      if (title) title.textContent = cur.labels
+        ? "Interactive · Figure 4a — Coexistence Risk map"
+        : `Interactive · Figure 4a — Coexistence Risk: ${cur.name}`;
+      readout.textContent = DEFAULT;
+      chips.querySelectorAll(".chip").forEach(c =>
+        c.setAttribute("aria-pressed", String(c.dataset.k === key)));
+    }
+
+    // tabs: Community + one per species (reuses .chip styling from the SDM viewer)
+    if (chips) {
+      chips.innerHTML = "";
+      const mk = (key, label, color) => {
+        const b = document.createElement("button");
+        b.className = "chip"; b.dataset.k = key;
+        b.setAttribute("aria-pressed", String(key === "__community"));
+        b.innerHTML = (color ? `<span class="sw" style="background:${color}"></span>` : "🌍 ") + label;
+        b.addEventListener("click", () => select(key));
+        chips.appendChild(b);
+      };
+      mk("__community", "Community");
+      for (const sp of (window.GOC.species || [])) if (views[sp.key]) mk(sp.key, sp.common, sp.color);
+    }
+
     stage.addEventListener("mousemove", e => {
       const r = stage.getBoundingClientRect();
       const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
       if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
-      const col = Math.min(gw - 1, Math.floor(fx * gw)), row = Math.min(gh - 1, Math.floor(fy * gh)), idx = row * gw + col;
-      if (!mask[idx]) { readout.textContent = "— sea / outside study area —"; return; }
-      const lon = E[0] + fx * (E[1] - E[0]), lat = E[3] - fy * (E[3] - E[2]), v = cri[idx];
+      const col = Math.min(cur.gw - 1, Math.floor(fx * cur.gw)),
+            row = Math.min(cur.gh - 1, Math.floor(fy * cur.gh)), idx = row * cur.gw + col;
+      if (!cur.mask[idx]) { readout.textContent = "— sea / outside study area —"; return; }
+      const lon = cur.E[0] + fx * (cur.E[1] - cur.E[0]), lat = cur.E[3] - fy * (cur.E[3] - cur.E[2]), v = cur.cri[idx];
       const band = v >= 80 ? "very high" : v >= 60 ? "high" : v >= 40 ? "moderate" : v >= 20 ? "low" : "very low";
-      readout.innerHTML = `At ${lat.toFixed(1)}°N, ${lon.toFixed(1)}°E · relative Coexistence Risk ≈ <b>${v}/100</b> (${band}).`;
+      const who = cur.labels ? "Coexistence Risk" : `${cur.name} risk`;
+      readout.innerHTML = `At ${lat.toFixed(1)}°N, ${lon.toFixed(1)}°E · relative ${who} ≈ <b>${v}/100</b> (${band}).`;
     });
-    stage.addEventListener("mouseleave", () => { readout.textContent = "Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed)."; });
+    stage.addEventListener("mouseleave", () => { readout.textContent = DEFAULT; });
   }
 
   /* ===================== FIG 4A labels — named bright clusters ===================== */
@@ -341,7 +394,8 @@
       // break the others or the primary charts
       j("fig2c").then(fig2c).catch(e => console.error("fig2c", e));
       j("fig3b").then(fig3b).catch(e => console.error("fig3b", e));
-      j("risk_grid").then(fig4a).catch(e => console.error("fig4a", e));
+      Promise.all([j("risk_grid"), j("cri_species").catch(() => null)])
+        .then(([rg, cs]) => fig4a(rg, cs)).catch(e => console.error("fig4a", e));
       j("fig4a").then(fig4aLabels).catch(e => console.error("fig4a labels", e));
     })
     .catch(err => { console.error("chart data load failed", err); frontiers(); });

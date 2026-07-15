@@ -260,17 +260,24 @@
       is brightest over the peri-Alpine arc, the Poland–Belarus lowland belt, and the north-eastern
       Baltic (Gulf-of-Finland) corner; the validation panels show the two out-of-sample tests above.</div></div>
 
-  <!-- interactive Figure 4a: hover the risk map -->
+  <!-- interactive Figure 4a: hover the risk map · switch community / per-species -->
   <div class="viz" id="fig4aViz">
-    <div class="viz-head"><h4>Interactive · Figure 4a — Coexistence Risk map</h4>
-      <span class="hint">hover anywhere to read the relative risk</span></div>
+    <div class="viz-head"><h4 id="fig4aTitle">Interactive · Figure 4a — Coexistence Risk map</h4>
+      <span class="hint">pick a tab · hover to read the relative risk</span></div>
     <div class="map-stage" id="fig4aStage">
       <img id="fig4aImg" src="assets/img/risk_map.png" alt="Coexistence Risk Index map of Europe">
       <div class="map-marks" id="fig4aMarks"></div>
     </div>
+    <div class="legend-chips" id="fig4aChips"></div>
     <p class="sdm-readout" id="fig4aReadout">Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed).</p>
     <p class="formula"><b>CRI = z(friction) + 0.8·z(current × human) + 0.8·z(gain into human land)</b> &nbsp;·&nbsp; z = standardized (z-score)</p>
-    <p class="cap">Labels name the brightest clusters. Some coastal/island bright spots (e.g. Scotland) are over-water transport artefacts — see the caveat above.</p>
+    <p class="cap"><b>Community</b> fuses all 7 taxa; the <b>per-species tabs</b> run the identical
+      recipe for one species at a time, revealing which taxon drives each hotspot (e.g. the Alps =
+      brown bear; the Baltic = wolf/lynx/fox/deer). Each map is stretched to its own 3rd–99th
+      percentile, so risk is <i>relative within the selected tab</i>. Because the community index
+      aggregates suitability <i>before</i> building the index, the per-species maps do not average
+      back to the community map. Some coastal/island bright spots (e.g. Scotland) are over-water
+      transport artefacts — see the caveat above.</p>
   </div>
 
   <div class="figure"><img alt="Figure S1: robustness" src="assets/img/figureS1_robustness.jpg" loading="lazy">

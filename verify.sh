@@ -33,11 +33,14 @@ for f in index.html assets/css/style.css assets/css/game.css \
          assets/data/meta.json assets/data/skill.json assets/data/niche.json \
          assets/data/sdm_grids.json assets/data/risk_grid.json assets/img/risk_map.png \
          assets/data/fig2c.json assets/data/fig3b.json \
-         assets/data/fig4a.json assets/img/corridor_map.png sources.html; do
+         assets/data/fig4a.json assets/img/corridor_map.png sources.html \
+         assets/data/cri_species.json; do
   [ -s "project/website/$f" ] && ok "$f" || no "$f MISSING"
 done
 NSDM=$(ls project/website/assets/img/sdm/*.png 2>/dev/null | wc -l | tr -d ' ')
 [ "$NSDM" = "14" ] && ok "14 per-species SDM map images" || no "expected 14 SDM images, found $NSDM"
+NCRI=$(ls project/website/assets/img/cri/*.png 2>/dev/null | wc -l | tr -d ' ')
+[ "$NCRI" = "7" ] && ok "7 per-species CRI map images" || no "expected 7 CRI images, found $NCRI"
 
 hdr "4. Figures"
 for n in figure1_framework figure2_transport figure3_connectivity_topology \
