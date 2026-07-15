@@ -62,10 +62,8 @@
 <header class="container src-hero">
   <div class="eyebrow">Bibliography</div>
   <h1>Works Cited</h1>
-  <p class="lede" style="font-size:18px;max-width:660px">Every method in the pipeline —
-    maximum entropy habitat models, optimal transport, spectral connectivity, and persistent
-    homology — rests on a specific published lineage. Here it is, in full, in MLA style.</p>
-  <p class="src-count">54 sources · grouped by pipeline stage · <a href="index.html">&larr; back to the project</a></p>
+  <p class="lede" style="font-size:18px;max-width:660px">MLA Citations for every source used in the project, categorized by topic.</p>
+  <p class="src-count">54 sources <a href="index.html">&larr; back to the project</a></p>
 
   <nav class="jump" aria-label="Jump to citation group">
     <a href="#g1">Habitat models</a>
@@ -86,7 +84,7 @@
   <!-- 01 -->
   <section class="cluster" id="g1">
     <div class="cluster-head"><span class="sec-num">01</span><h3>Maximum entropy &amp; habitat models</h3></div>
-    <p class="cluster-note">The foundation stage — MaxEnt itself, and the papers that shaped how it's fit and read.</p>
+    <p class="cluster-note">Foundational papers on MaxEnt and its applications.</p>
     <div class="refs">
       <div class="ref"><span class="tag">1</span><p class="cite">Phillips, Steven J., Robert P. Anderson, and Robert E. Schapire. "Maximum Entropy Modeling of Species Geographic Distributions." <i>Ecological Modelling</i>, vol. 190, no. 3–4, 2006, pp. 231–259.</p></div>
       <div class="ref"><span class="tag">2</span><p class="cite">Phillips, Steven J., and Miroslav Dudík. "Modeling of Species Distributions with Maxent: New Extensions and a Comprehensive Evaluation." <i>Ecography</i>, vol. 31, no. 2, 2008, pp. 161–175.</p></div>
@@ -100,7 +98,7 @@
   <!-- 02 -->
   <section class="cluster" id="g2">
     <div class="cluster-head"><span class="sec-num">02</span><h3>Presence-only statistics &amp; the point-process equivalence</h3></div>
-    <p class="cluster-note">The mathematical bridge the project leans on: MaxEnt refit as a penalized Poisson point process.</p>
+    <p class="cluster-note">Papers that connect the bridge between MaxEnt and point process models.</p>
     <div class="refs">
       <div class="ref"><span class="tag">5</span><p class="cite">Renner, Ian W., and David I. Warton. "Equivalence of MAXENT and Poisson Point Process Models for Species Distribution Modeling in Ecology." <i>Biometrics</i>, vol. 69, no. 1, 2013, pp. 274–281.</p></div>
       <div class="ref"><span class="tag">6</span><p class="cite">Warton, David I., and Leah C. Shepherd. "Poisson Point Process Models Solve the 'Pseudo-Absence Problem' for Presence-Only Data in Ecology." <i>Annals of Applied Statistics</i>, vol. 4, no. 3, 2010, pp. 1383–1402.</p></div>
@@ -116,7 +114,7 @@
   <!-- 03 -->
   <section class="cluster" id="g3">
     <div class="cluster-head"><span class="sec-num">03</span><h3>Spatial cross-validation &amp; honest model skill</h3></div>
-    <p class="cluster-note">Why the project reports spatial-block AUC rather than a naively inflated random-fold score.</p>
+    <p class="cluster-note">Papers responsible for the development and application of spatial-block AUC as a more rigorous validation metric.</p>
     <div class="refs">
       <div class="ref"><span class="tag">15</span><p class="cite">Roberts, David R., et al. "Cross-Validation Strategies for Data with Temporal, Spatial, Hierarchical, or Phylogenetic Structure." <i>Ecography</i>, vol. 40, no. 8, 2017, pp. 913–929.</p></div>
       <div class="ref"><span class="tag">16</span><p class="cite">Valavi, Roozbeh, et al. "blockCV: An R Package for Generating Spatially or Environmentally Separated Folds for K-Fold Cross-Validation of Species Distribution Models." <i>Methods in Ecology and Evolution</i>, vol. 10, no. 2, 2019, pp. 225–232.</p></div>
@@ -127,7 +125,7 @@
   <!-- 04 -->
   <section class="cluster" id="g4">
     <div class="cluster-head"><span class="sec-num">04</span><h3>Climate data &amp; deep-learning SDMs</h3></div>
-    <p class="cluster-note">The bioclimatic layers driving the models, and the neural-network alternative the project deliberately doesn't chase.</p>
+    <p class="cluster-note">The bioclimatic layers driving the models and why we aren't using deep learning for all tasks.</p>
     <div class="refs">
       <div class="ref"><span class="tag">18</span><p class="cite">Hijmans, Robert J., et al. "Very High Resolution Interpolated Climate Surfaces for Global Land Areas." <i>International Journal of Climatology</i>, vol. 25, no. 15, 2005, pp. 1965–1978.</p></div>
       <div class="ref"><span class="tag">19</span><p class="cite">Fick, Stephen E., and Robert J. Hijmans. "WorldClim 2: New 1-km Spatial Resolution Climate Surfaces for Global Land Areas." <i>International Journal of Climatology</i>, vol. 37, no. 12, 2017, pp. 4302–4315.</p></div>
@@ -143,7 +141,7 @@
   <!-- 05 -->
   <section class="cluster" id="g5">
     <div class="cluster-head"><span class="sec-num">05</span><h3>Optimal transport</h3></div>
-    <p class="cluster-note">The engine behind the displacement field: how much habitat has to move, and where.</p>
+    <p class="cluster-note">Papers guiding us on how much habitat has to move, and where (Displacement).</p>
     <div class="refs">
       <div class="ref"><span class="tag">26</span><p class="cite">Cuturi, Marco. "Sinkhorn Distances: Lightspeed Computation of Optimal Transport." <i>Advances in Neural Information Processing Systems (NeurIPS)</i>, vol. 26, 2013, pp. 2292–2300.</p></div>
       <div class="ref"><span class="tag">27</span><p class="cite">Peyré, Gabriel, and Marco Cuturi. "Computational Optimal Transport." <i>Foundations and Trends in Machine Learning</i>, vol. 11, no. 5–6, 2019, pp. 355–607.</p></div>
@@ -156,7 +154,7 @@
   <!-- 06 -->
   <section class="cluster" id="g6">
     <div class="cluster-head"><span class="sec-num">06</span><h3>Spectral connectivity &amp; circuit theory</h3></div>
-    <p class="cluster-note">The graph-Laplacian machinery that routes transport demand through a resistant landscape.</p>
+    <p class="cluster-note">Papers guiding us on how to model connectivity using spectral methods and circuit theory.</p>
     <div class="refs">
       <div class="ref"><span class="tag">31</span><p class="cite">McRae, Brad H., et al. "Using Circuit Theory to Model Connectivity in Ecology, Evolution, and Conservation." <i>Ecology</i>, vol. 89, no. 10, 2008, pp. 2712–2724.</p></div>
       <div class="ref"><span class="tag">32</span><p class="cite">Dickson, Brett G., et al. "Circuit-Theory Applications to Connectivity Science and Conservation." <i>Conservation Biology</i>, vol. 33, no. 2, 2019, pp. 239–249.</p></div>
@@ -167,7 +165,7 @@
   <!-- 07 -->
   <section class="cluster" id="g7">
     <div class="cluster-head"><span class="sec-num">07</span><h3>Persistent homology &amp; topological data analysis</h3></div>
-    <p class="cluster-note">Measuring how the fragmenting range breaks into interior gaps — the H₁ loop count in Figure 3.</p>
+    <p class="cluster-note">Papers guiding us on how to analyze the topological structure of data using persistent homology.</p>
     <div class="refs">
       <div class="ref"><span class="tag">34</span><p class="cite">Edelsbrunner, Herbert, and John Harer. <i>Computational Topology: An Introduction</i>. American Mathematical Society, 2010.</p></div>
       <div class="ref"><span class="tag">35</span><p class="cite">Carlsson, Gunnar. "Topology and Data." <i>Bulletin of the American Mathematical Society</i>, vol. 46, no. 2, 2009, pp. 255–308.</p></div>
@@ -180,7 +178,7 @@
   <!-- 08 -->
   <section class="cluster" id="g8">
     <div class="cluster-head"><span class="sec-num">08</span><h3>Human pressure &amp; human–wildlife conflict</h3></div>
-    <p class="cluster-note">The fixed side of the friction field, and the conflict literature the project's forward prediction is tested against.</p>
+    <p class="cluster-note">Papers guiding us on how to model human pressure and predict human–wildlife conflict.</p>
     <div class="refs">
       <div class="ref"><span class="tag">39</span><p class="cite">Venter, Oscar, et al. "Global Terrestrial Human Footprint Maps for 1993 and 2009." <i>Scientific Data</i>, vol. 3, 2016, article 160067.</p></div>
       <div class="ref"><span class="tag">40</span><p class="cite">Kennedy, Christina M., et al. "Managing the Middle: A Shift in Conservation Priorities Based on the Global Human Modification Gradient." <i>Global Change Biology</i>, vol. 25, no. 3, 2019, pp. 811–826.</p></div>
@@ -197,7 +195,7 @@
   <!-- 09 -->
   <section class="cluster" id="g9">
     <div class="cluster-head"><span class="sec-num">09</span><h3>Niche &amp; range-estimation methods</h3></div>
-    <p class="cluster-note">Supporting geometry — niche overlap statistics and range-boundary estimation used in the validation tests.</p>
+    <p class="cluster-note">Papers guiding us on how to estimate ecological niches and species ranges.</p>
     <div class="refs">
       <div class="ref"><span class="tag">48</span><p class="cite">Pateiro-López, Beatriz, and Alberto Rodríguez-Casal. "Generalizing the Convex Hull of a Sample: The R Package alphahull." <i>Journal of Statistical Software</i>, vol. 34, no. 5, 2010, pp. 1–28.</p></div>
       <div class="ref"><span class="tag">49</span><p class="cite">Broennimann, Olivier, et al. "Measuring Ecological Niche Overlap from Occurrence and Spatial Environmental Data." <i>Global Ecology and Biogeography</i>, vol. 21, no. 4, 2012, pp. 481–497.</p></div>
@@ -209,7 +207,7 @@
   <!-- 10 -->
   <section class="cluster" id="g10">
     <div class="cluster-head"><span class="sec-num">10</span><h3>Climate scenarios &amp; model selection</h3></div>
-    <p class="cluster-note">The SSP2-4.5 / SSP5-8.5 forcing behind the two future horizons, and how MaxEnt's own settings were chosen.</p>
+    <p class="cluster-note">Papers guiding us on how to select parameters for climate scenarios and models for future projections.</p>
     <div class="refs">
       <div class="ref"><span class="tag">51</span><p class="cite">Thuiller, Wilfried, et al. "Climate Change Threats to Plant Diversity in Europe." <i>Global Change Biology</i>, 2005.</p></div>
       <div class="ref"><span class="tag">52</span><p class="cite">Intergovernmental Panel on Climate Change. <i>Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change</i>. Cambridge UP, 2021.</p></div>
