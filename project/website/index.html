@@ -53,16 +53,11 @@
 <section class="container reveal">
   <div class="reading">
     <div class="sec-head"><span class="sec-num">The idea</span></div>
-    <h2>Conflict is moving mass meeting fixed pressure</h2>
-    <p>As the climate warms, the comfortable habitat of a species has to <em>move</em> —
-      generally poleward and uphill. But it moves across a continent whose land people
-      have already claimed. Human–wildlife conflict — livestock loss, vehicle collisions,
-      crop raiding, bears at the edge of town — happens exactly where that moving habitat
-      is forced <em>into</em> human-dominated space and can't flow around it.</p>
-    <p>Almost every existing model predicts conflict by looking backward at past conflict
-      records. We predict it <b>forward, from mechanism</b>: the transport, connectivity,
-      and topology of climate-forced redistribution. Because the model never sees conflict
-      data, testing it against reality is a genuine out-of-sample test — not a re-fit.</p>
+    <h2>Conflict is where moving habitats meet fixed human landscapes</h2>
+    <p>As Europe's climate changes, the habitats species rely on are shifting across the continent, generally northward and toward higher elevations. Wildlife moves to follow these changing conditions, but people, roads, cities, and agricultural land remain largely fixed in place. Human-wildlife conflict emerges where those moving habitats intersect with human-dominated landscapes, through livestock losses, crop damage, vehicle collisions, and wildlife appearing in places where people are not used to seeing them.</p>
+    <p>Most existing models learn from historical conflict records to predict future conflict.</p>
+    <p>We take a different approach.</p>
+    <p>Rather than learning from past interactions, we model the processes that create them: habitat shifts, species movement, landscape connectivity, and the pathways animals use as they redistribute under climate change. Because our model is never trained on conflict data, its agreement with observed conflict patterns represents a genuine prediction rather than a rediscovery of the data it was given.</p>
     <div class="eq">p(x) &prop; e<sup>&beta;·f(x)</sup> &nbsp;&rarr;&nbsp; min&nbsp;&langle;P,C&rangle; &minus; &epsilon;H(P) &nbsp;&rarr;&nbsp; F(x) = &langle;T(x), &nabla;H(x)&rangle;<sub>+</sub> &nbsp;&rarr;&nbsp; Coexistence Risk</div>
   </div>
 
@@ -82,16 +77,18 @@
 <!-- ===================== 01 FOUNDATION ===================== -->
 <section class="container reveal" id="foundation">
   <div class="sec-head"><span class="sec-num">01</span></div>
-  <h2>A foundation of well-calibrated habitat models</h2>
-  <p class="sub">We rebuilt the maximum-entropy species distribution model from scratch —
-    as its exact equivalent, a penalized Poisson point process — and fit it for seven
-    European mammals from 57,838 GBIF records.</p>
-
+  <h2>A foundation built on habitat models we trust</h2>
+  <p class="sub">To understand where species may move in the future, we first needed to understand where they can live today. Using 57,838 GBIF observations, we built habitat models for seven European mammal species, using a maximum entropy approach implemented through its mathematically equivalent penalized Poisson point process formulation, and used them to map suitable habitat under both present and future climates.</p>
   <div class="figure"><img alt="Figure 1: framework and data" src="assets/img/figure1_framework.jpg" loading="lazy">
-    <div class="cap"><b>Figure 1 — Framework &amp; data.</b> Occurrence density and realized
+    <div class="cap"><b>Figure 1 — Framework &amp; data.</b> Occurrence density; realized
       climatic niches; the Gibbs&rarr;transport&rarr;topology pipeline; and spatial
-      cross-validation skill. Colours use the Okabe–Ito colourblind-safe palette with
-      redundant marker shapes.</div></div>
+      cross-validation skill. </div></div>
+    <div class="panels">
+      <div class="panel"><h4>Figure 1a - Georeferenced Records</h4><p>We utilize open-access GBIF sightings of seven mammal species across Europe. Because this is "presence-only" data (we know where species were spotted, but not where they weren't), we use specialized Poisson point process models designed to handle this inherent ecological bias. </p></div>
+      <div class="panel b"><h4>Figure 1b – Climatic Niches</h4><p>To map each species' environmental comfort zone, we condensed dozens of complex climate variables into two Principal Components (PCs) that capture nearly 80% of Europe's climatic variation. This visually separates highly adaptable climate generalists from climate specialists. </p></div>
+      <div class="panel c"><h4>Figure 1c – Mechanistic Pipeline</h4><p>This flowchart traces our entire modeling journey. By feeding raw occurrences and climate niches into physical movement algorithms, we generate our final Coexistence Risk Index without ever using historical conflict data for training—ensuring our predictions are truly mechanistic. </p></div>
+      <div class="panel d"><h4>Figure 1d – Model Skill</h4><p>Rather than using standard random validation-which can artificially inflate accuracy due to nearby, similar locations-we implemented strict spatial cross-validation. By hiding entire geographic blocks during testing, we prove our model's real-world predictive power.</p></div>
+    </div>
 
   <!-- interactive niche + skill -->
   <div class="viz" id="nicheViz">
