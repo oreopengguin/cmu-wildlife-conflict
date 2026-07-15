@@ -2,6 +2,7 @@
 project/data/
 project/.venv/
 .venv/
+.claude/
 
 # raw datasets / caches
 *.zip
