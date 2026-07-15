@@ -31,7 +31,9 @@ hdr "3. Website assets"
 for f in index.html assets/css/style.css assets/css/game.css \
          assets/js/main.js assets/js/charts.js assets/js/maps.js assets/js/game.js \
          assets/data/meta.json assets/data/skill.json assets/data/niche.json \
-         assets/data/sdm_grids.json assets/data/risk_grid.json assets/img/risk_map.png; do
+         assets/data/sdm_grids.json assets/data/risk_grid.json assets/img/risk_map.png \
+         assets/data/fig2c.json assets/data/fig3b.json assets/data/fig4d.json \
+         assets/img/corridor_map.png sources.html; do
   [ -s "project/website/$f" ] && ok "$f" || no "$f MISSING"
 done
 NSDM=$(ls project/website/assets/img/sdm/*.png 2>/dev/null | wc -l | tr -d ' ')

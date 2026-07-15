@@ -214,6 +214,104 @@ def export_risk(A):
     print("wrote risk_grid.json")
 
 
+def export_fig2c(A):
+    """Interactive Figure 2c: per-species median required range-shift vs latitude
+    — the exact series fig2.py::panel_c draws as coloured trend lines."""
+    sps = FD.species_present(A)
+    mask = A["mask"]; lats = A["lats"]
+    LAT = np.meshgrid(A["lons"], lats)[1]
+    bins = np.linspace(lats[-1], lats[0], 12)
+    ctr = 0.5 * (bins[1:] + bins[:-1])
+    species, ymax = [], 0.0
+    for sp in sps:
+        s = A[f"shift__{sp}"]; p = A[f"present__{sp}"]
+        ok = mask & np.isfinite(s) & (np.nan_to_num(p) > np.nanpercentile(p, 60))
+        xx = LAT[ok]; yy = s[ok]
+        pts = []
+        for i in range(len(bins) - 1):
+            sel = (xx >= bins[i]) & (xx < bins[i + 1])
+            if sel.sum() > 20:
+                m = float(np.median(yy[sel]))
+                pts.append([round(float(ctr[i]), 2), round(m, 1)])
+                ymax = max(ymax, m)
+        species.append({"key": sp, "common": C.SPECIES_COMMON[sp],
+                        "color": C.SPECIES_COLOR[sp], "marker": C.SPECIES_MARKER[sp],
+                        "points": pts})
+    out = {"lat_min": round(float(lats[-1]), 1), "lat_max": round(float(lats[0]), 1),
+           "shift_max": round(ymax, 0), "species": species}
+    (DATA / "fig2c.json").write_text(json.dumps(out))
+    print("wrote fig2c.json")
+
+
+def export_fig3b(A):
+    """Interactive Figure 3b: conflict-corridor field (current × human pressure)
+    with the top-16 pinch-points — the exact circles fig3.py::panel_b marks."""
+    from scipy.ndimage import maximum_filter
+    mask = A["mask"]; lons = A["lons"]; lats = A["lats"]
+    corridor = np.where(mask, A["current"] * np.clip(A["H"], 0, 1), np.nan)
+    pos = corridor[np.isfinite(corridor) & (corridor > 0)]
+    vmax = float(np.percentile(pos, 97))
+    # clean background PNG (EMBER, transparent sea) — matches the figure's panel b
+    f = np.clip(corridor / (vmax + 1e-9), 0, 1); f = np.where(mask, f, np.nan)
+    ny, nx = mask.shape
+    fig = plt.figure(figsize=(nx / 100, ny / 100), dpi=150)
+    ax = fig.add_axes([0, 0, 1, 1]); ax.axis("off")
+    ax.imshow(f, cmap=FS.EMBER, vmin=0, vmax=1, interpolation="bilinear")
+    ax.contour(mask.astype(float), levels=[0.5], colors=["#0b1220"], linewidths=0.5, alpha=0.6)
+    fig.savefig(IMG / "corridor_map.png", transparent=True, dpi=150); plt.close(fig)
+    # coarse intensity grid for hover-anywhere
+    cf = 3
+    cc, cm = coarsen(corridor, mask, cf)
+    ccv = np.clip(np.nan_to_num(cc) / (vmax + 1e-9), 0, 1)
+    # pinch-points = top-16 local maxima of the corridor field (as in fig3.py)
+    cf0 = np.nan_to_num(corridor)
+    loc = maximum_filter(cf0, size=11)
+    thr = float(np.percentile(pos, 92))
+    pk = (cf0 == loc) & (cf0 > thr)
+    ys, xs = np.where(pk)
+    order = np.argsort(cf0[ys, xs])[-16:][::-1]            # highest intensity first
+    circles = []
+    for rank, k in enumerate(order, 1):
+        yy, xx = int(ys[k]), int(xs[k])
+        circles.append({"lon": round(float(lons[xx]), 2), "lat": round(float(lats[yy]), 2),
+                        "intensity": round(float(corridor[yy, xx]), 3),
+                        "rel": round(float(corridor[yy, xx] / (vmax + 1e-9) * 100)),
+                        "rank": rank})
+    out = {"extent": [float(lons[0]), float(lons[-1]), float(lats[-1]), float(lats[0])],
+           "coarse_shape": list(cm.shape), "mask": _b64_u8(cm.ravel()),
+           "grid": _b64_u8(np.round(ccv.ravel() * 100)), "vmax": round(vmax, 3),
+           "circles": circles}
+    (DATA / "fig3b.json").write_text(json.dumps(out))
+    print(f"wrote fig3b.json ({len(circles)} pinch-points) + corridor_map.png")
+
+
+def export_fig4d(A):
+    """Interactive Figure 4d: per-species risk decomposition — the exact five
+    signals fig4.py::panel_d tabulates (raw values + across-species z-scores)."""
+    s = FD.load_summary(); sps = FD.species_present(A)
+    labels = ["W-shift (km)", "Δpatches", "topo shift", "mean friction", "interface AUC"]
+    rows, M = [], []
+    for sp in sps:
+        r = s["species"][sp]
+        fr = A[f"friction__{sp}"]
+        mf = float(np.nanmean(fr[np.isfinite(fr) & (fr > 0)])) if np.isfinite(fr).any() else np.nan
+        vals = [float(r["W_shift_km"]),
+                float(r["frag_future"]["n_patches"] - r["frag_present"]["n_patches"]),
+                float(r["topo_change_W1"]), mf,
+                float(r["interface"]["auc_friction"]) if r["interface"] else np.nan]
+        M.append(vals)
+        rows.append({"key": sp, "common": C.SPECIES_COMMON[sp],
+                     "color": C.SPECIES_COLOR[sp], "marker": C.SPECIES_MARKER[sp]})
+    M = np.array(M, float)
+    Z = (M - np.nanmean(M, axis=0)) / (np.nanstd(M, axis=0) + 1e-9)
+    for i, rr in enumerate(rows):
+        rr["vals"] = [None if not np.isfinite(v) else round(float(v), 3) for v in M[i]]
+        rr["z"] = [None if not np.isfinite(z) else round(float(z), 2) for z in Z[i]]
+    out = {"metrics": labels, "species": rows}
+    (DATA / "fig4d.json").write_text(json.dumps(out))
+    print("wrote fig4d.json")
+
+
 def copy_figures():
     for n in ["figure1_framework", "figure2_transport",
               "figure3_connectivity_topology", "figure4_risk_validation",
@@ -232,6 +330,9 @@ def main():
     export_niche(A)
     export_sdm(A)
     export_risk(A)
+    export_fig2c(A)
+    export_fig3b(A)
+    export_fig4d(A)
     copy_figures()
     print("== web export complete ==")
 

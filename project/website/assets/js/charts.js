@@ -191,14 +191,208 @@
     host.querySelectorAll(".reveal").forEach(e => e.classList.add("in"));
   }
 
+  /* ===================== shared helpers for the new panels ===================== */
+  const b64ToU8 = s => { const b = atob(s); const a = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; };
+  function svgXY(svg, e) {                       // client px -> viewBox coords
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const m = svg.getScreenCTM(); return m ? p.matrixTransform(m.inverse()) : { x: 0, y: 0 };
+  }
+  const signed = v => (v > 0 ? "+" : "") + v;
+
+  /* ===================== FIG 2C — species shift-vs-latitude ===================== */
+  function fig2c(data) {
+    const svg = document.getElementById("fig2cChart"); if (!svg) return;
+    const W = 760, H = 440, M = { l: 60, r: 18, t: 16, b: 46 };
+    const xmin = data.lat_min, xmax = data.lat_max, ymin = 0, ymax = data.shift_max * 1.06;
+    const px = v => M.l + (v - xmin) / (xmax - xmin) * (W - M.l - M.r);
+    const py = v => H - M.b - (v - ymin) / (ymax - ymin) * (H - M.t - M.b);
+    svg.innerHTML = "";
+    for (let t = 0; t <= ymax; t += 200) {
+      svg.appendChild(el("line", { x1: M.l, y1: py(t), x2: W - M.r, y2: py(t), stroke: "var(--line)", "stroke-width": 1 }));
+      const tx = el("text", { x: M.l - 8, y: py(t) + 3, "text-anchor": "end", fill: "var(--slate)", "font-size": 11 }); tx.textContent = t; svg.appendChild(tx);
+    }
+    for (let lat = 35; lat <= 70; lat += 5) {
+      const tx = el("text", { x: px(lat), y: H - M.b + 16, "text-anchor": "middle", fill: "var(--slate)", "font-size": 11 }); tx.textContent = lat; svg.appendChild(tx);
+    }
+    const xl = el("text", { x: (M.l + W - M.r) / 2, y: H - 6, "text-anchor": "middle", fill: "var(--slate)", "font-size": 12 }); xl.textContent = "Latitude (°N)"; svg.appendChild(xl);
+    const yl = el("text", { x: 16, y: (M.t + H - M.b) / 2, "text-anchor": "middle", fill: "var(--slate)", "font-size": 12, transform: `rotate(-90 16 ${(M.t + H - M.b) / 2})` }); yl.textContent = "Required range shift (km)"; svg.appendChild(yl);
+    const guide = el("line", { y1: M.t, y2: H - M.b, stroke: "var(--faint)", "stroke-width": 1, "stroke-dasharray": "3 3", opacity: 0 }); svg.appendChild(guide);
+    const dot = el("circle", { r: 4.5, fill: "var(--card)", stroke: "var(--ink)", "stroke-width": 1.6, opacity: 0 }); svg.appendChild(dot);
+
+    const groups = {}, hidden = {};
+    function spotlight(key, on) { for (const k in groups) { if (hidden[k]) continue; groups[k].style.opacity = (!on || k === key) ? "1" : "0.14"; } }
+    const interp = (pts, lat) => {
+      if (lat <= pts[0][0]) return pts[0][1];
+      if (lat >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
+      for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1];
+        if (lat >= a[0] && lat <= b[0]) return a[1] + (lat - a[0]) / (b[0] - a[0] + 1e-9) * (b[1] - a[1]); }
+      return pts[pts.length - 1][1];
+    };
+    for (const sp of data.species) {
+      const pts = sp.points; if (pts.length < 2) continue;
+      const g = el("g", { class: "fig2c-sp", tabindex: 0, role: "img", "aria-label": `${sp.common} range shift vs latitude` });
+      const d = pts.map((p, i) => `${i ? "L" : "M"}${px(p[0])},${py(p[1])}`).join(" ");
+      const line = el("path", { d, fill: "none", stroke: sp.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" });
+      g.appendChild(line);
+      for (const p of pts) marker(g, sp.marker, px(p[0]), py(p[1]), 4, sp.color);
+      const hit = el("path", { d, fill: "none", stroke: "transparent", "stroke-width": 16, "stroke-linecap": "round" });
+      g.appendChild(hit);
+      const hi = on => { line.setAttribute("stroke-width", on ? 3.4 : 2); spotlight(sp.key, on); };
+      hit.addEventListener("mousemove", e => {
+        const loc = svgXY(svg, e);
+        let lat = xmin + (loc.x - M.l) / (W - M.l - M.r) * (xmax - xmin);
+        lat = Math.max(pts[0][0], Math.min(pts[pts.length - 1][0], lat));
+        const val = interp(pts, lat);
+        guide.setAttribute("x1", px(lat)); guide.setAttribute("x2", px(lat)); guide.setAttribute("opacity", 1);
+        dot.setAttribute("cx", px(lat)); dot.setAttribute("cy", py(val)); dot.setAttribute("stroke", sp.color); dot.setAttribute("opacity", 1);
+        tip.show(`<span class="tt-t">${sp.common}</span>at ${lat.toFixed(0)}°N → required shift ≈ <b>${Math.round(val)} km</b>`, e.clientX, e.clientY);
+      });
+      hit.addEventListener("mouseenter", () => hi(true));
+      hit.addEventListener("mouseleave", () => { hi(false); tip.hide(); guide.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); });
+      g.addEventListener("focus", () => hi(true)); g.addEventListener("blur", () => hi(false));
+      groups[sp.key] = g; svg.appendChild(g);
+    }
+    const leg = document.getElementById("fig2cLegend"); leg.innerHTML = "";
+    for (const sp of data.species) {
+      const chip = document.createElement("button"); chip.className = "chip"; chip.setAttribute("aria-pressed", "true");
+      chip.innerHTML = `<span class="sw" style="background:${sp.color}"></span>${sp.common}`;
+      chip.addEventListener("click", () => { const on = chip.getAttribute("aria-pressed") === "true"; chip.setAttribute("aria-pressed", String(!on)); hidden[sp.key] = on; if (groups[sp.key]) groups[sp.key].style.display = on ? "none" : ""; });
+      chip.addEventListener("mouseenter", () => { if (!hidden[sp.key]) spotlight(sp.key, true); });
+      chip.addEventListener("mouseleave", () => spotlight(sp.key, false));
+      leg.appendChild(chip);
+    }
+  }
+
+  /* ===================== FIG 3B — corridor map + pinch-points ===================== */
+  function fig3b(data) {
+    const stage = document.getElementById("fig3bStage"); if (!stage) return;
+    const img = document.getElementById("fig3bImg"); img.src = "assets/img/corridor_map.png";
+    const marks = document.getElementById("fig3bMarks");
+    const readout = document.getElementById("fig3bReadout");
+    const [gh, gw] = data.coarse_shape, mask = b64ToU8(data.mask), grid = b64ToU8(data.grid), E = data.extent;
+    const toFrac = (lon, lat) => [(lon - E[0]) / (E[1] - E[0]), (E[3] - lat) / (E[3] - E[2])];
+    marks.innerHTML = "";
+    data.circles.forEach(c => {
+      const [fx, fy] = toFrac(c.lon, c.lat);
+      const pin = document.createElement("div");
+      pin.className = "pin"; pin.style.left = fx * 100 + "%"; pin.style.top = fy * 100 + "%";
+      pin.setAttribute("tabindex", "0"); pin.setAttribute("role", "img");
+      pin.setAttribute("aria-label", `Pinch-point rank ${c.rank}, corridor intensity ${c.intensity}`);
+      pin.innerHTML = `<span class="rk">${c.rank}</span>`;
+      pin.addEventListener("mousemove", e => { e.stopPropagation(); pin.classList.add("on");
+        tip.show(`<span class="tt-t">Pinch-point #${c.rank}</span>${c.lat.toFixed(1)}°N, ${c.lon.toFixed(1)}°E<br>corridor intensity <b>${c.intensity}</b> · ${c.rel}% of the p97 scale`, e.clientX, e.clientY); });
+      pin.addEventListener("mouseleave", () => { pin.classList.remove("on"); tip.hide(); });
+      marks.appendChild(pin);
+    });
+    stage.addEventListener("mousemove", e => {
+      const r = stage.getBoundingClientRect();
+      const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+      if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
+      const col = Math.min(gw - 1, Math.floor(fx * gw)), row = Math.min(gh - 1, Math.floor(fy * gh)), idx = row * gw + col;
+      if (!mask[idx]) { readout.textContent = "— sea / outside study area —"; return; }
+      const lon = E[0] + fx * (E[1] - E[0]), lat = E[3] - fy * (E[3] - E[2]);
+      readout.innerHTML = `At ${lat.toFixed(1)}°N, ${lon.toFixed(1)}°E · conflict-corridor intensity ≈ <b>${grid[idx]}%</b> of the peak &nbsp;·&nbsp; rings = the 16 strongest pinch-points.`;
+    });
+    stage.addEventListener("mouseleave", () => { readout.textContent = "Hover the map to read conflict-corridor intensity; hover a ring for a ranked pinch-point."; });
+  }
+
+  /* ===================== FIG 4A — CRI map (reuses risk_grid) ===================== */
+  function fig4a(data) {
+    const stage = document.getElementById("fig4aStage"); if (!stage) return;
+    const readout = document.getElementById("fig4aReadout");
+    const [gh, gw] = data.coarse_shape, mask = b64ToU8(data.mask), cri = b64ToU8(data.cri), E = data.extent;
+    stage.addEventListener("mousemove", e => {
+      const r = stage.getBoundingClientRect();
+      const fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+      if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
+      const col = Math.min(gw - 1, Math.floor(fx * gw)), row = Math.min(gh - 1, Math.floor(fy * gh)), idx = row * gw + col;
+      if (!mask[idx]) { readout.textContent = "— sea / outside study area —"; return; }
+      const lon = E[0] + fx * (E[1] - E[0]), lat = E[3] - fy * (E[3] - E[2]), v = cri[idx];
+      const band = v >= 80 ? "very high" : v >= 60 ? "high" : v >= 40 ? "moderate" : v >= 20 ? "low" : "very low";
+      readout.innerHTML = `At ${lat.toFixed(1)}°N, ${lon.toFixed(1)}°E · relative Coexistence Risk ≈ <b>${v}/100</b> (${band}).`;
+    });
+    stage.addEventListener("mouseleave", () => { readout.textContent = "Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed)."; });
+  }
+
+  /* ===================== FIG 4B — predicted vs observed shift ===================== */
+  function fig4b(meta) {
+    const svg = document.getElementById("fig4bChart"); if (!svg) return;
+    const pts = meta.species.filter(s => s.obs_dlat != null).map(s => ({ ...s, x: s.obs_dlat, y: s.pred_dlat }));
+    if (!pts.length) return;
+    const W = 560, H = 470, M = { l: 56, r: 18, t: 20, b: 50 };
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+    let lo = Math.min(...xs, ...ys, 0), hi = Math.max(...xs, ...ys, 0);
+    const pad = 0.12 * (hi - lo + 1e-9); lo -= pad; hi += pad;
+    const px = v => M.l + (v - lo) / (hi - lo) * (W - M.l - M.r);
+    const py = v => H - M.b - (v - lo) / (hi - lo) * (H - M.t - M.b);
+    svg.innerHTML = "";
+    svg.appendChild(el("line", { x1: px(0), y1: M.t, x2: px(0), y2: H - M.b, stroke: "var(--line)", "stroke-width": 1 }));
+    svg.appendChild(el("line", { x1: M.l, y1: py(0), x2: W - M.r, y2: py(0), stroke: "var(--line)", "stroke-width": 1 }));
+    svg.appendChild(el("line", { x1: px(lo), y1: py(lo), x2: px(hi), y2: py(hi), stroke: "var(--faint)", "stroke-width": 1.4, "stroke-dasharray": "5 4" }));
+    const t11 = el("text", { x: px(hi) - 4, y: py(hi) + 14, "text-anchor": "end", fill: "var(--slate)", "font-size": 10 }); t11.textContent = "1:1 (perfect prediction)"; svg.appendChild(t11);
+    const xl = el("text", { x: (M.l + W - M.r) / 2, y: H - 8, "text-anchor": "middle", fill: "var(--slate)", "font-size": 11.5 }); xl.textContent = "Observed Δlatitude (°)"; svg.appendChild(xl);
+    const yl = el("text", { x: 15, y: (M.t + H - M.b) / 2, "text-anchor": "middle", fill: "var(--slate)", "font-size": 11.5, transform: `rotate(-90 15 ${(M.t + H - M.b) / 2})` }); yl.textContent = "OT-predicted Δlatitude (°)"; svg.appendChild(yl);
+    for (const p of pts) {
+      const g = el("g", { tabindex: 0, role: "img", "aria-label": `${p.common} observed ${p.x} predicted ${p.y}` });
+      marker(g, p.marker, px(p.x), py(p.y), 7, p.color);
+      const note = p.key === "Canis lupus" ? "<br><i>recolonization-driven outlier</i>" : "";
+      const tt = e => tip.show(`<span class="tt-t">${p.common}</span>observed <b>${signed(p.x)}°</b> · predicted <b>${signed(p.y)}°</b>${note}`, e.clientX, e.clientY);
+      g.addEventListener("mousemove", tt); g.addEventListener("mouseleave", () => tip.hide());
+      g.addEventListener("focus", () => tip.show(`${p.common}: observed ${signed(p.x)}, predicted ${signed(p.y)}`, px(p.x) + 40, py(p.y) + 140)); g.addEventListener("blur", () => tip.hide());
+      svg.appendChild(g);
+    }
+    const r = meta.results || {};
+    const st = el("text", { x: M.l + 6, y: M.t + 10, fill: "var(--ink)", "font-size": 11, "font-weight": 600 });
+    st.textContent = `Spearman ρ = ${r.spearman} · Pearson r = ${r.pearson}`; svg.appendChild(st);
+  }
+
+  /* ===================== FIG 4D — per-species risk decomposition ===================== */
+  function fig4d(data) {
+    const svg = document.getElementById("fig4dChart"); if (!svg) return;
+    const sps = data.species, metrics = data.metrics, nR = sps.length, nC = metrics.length;
+    const W = 560, H = 470, M = { l: 104, r: 14, t: 78, b: 14 };
+    const cw = (W - M.l - M.r) / nC, ch = (H - M.t - M.b) / nR;
+    const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+    const NEG = [94, 60, 153], MID = [247, 247, 247], POS = [178, 24, 43];
+    const zcol = z => { if (z == null) return "var(--card2)"; const t = Math.max(-1, Math.min(1, z / 2));
+      const c = t < 0 ? mix(MID, NEG, -t) : mix(MID, POS, t); return `rgb(${c[0] | 0},${c[1] | 0},${c[2] | 0})`; };
+    svg.innerHTML = "";
+    metrics.forEach((mn, j) => {
+      const cx = M.l + cw * (j + 0.5);
+      const tx = el("text", { x: cx, y: M.t - 10, "text-anchor": "start", fill: "var(--slate)", "font-size": 10, transform: `rotate(-40 ${cx} ${M.t - 10})` }); tx.textContent = mn; svg.appendChild(tx);
+    });
+    sps.forEach((sp, i) => {
+      const ty = el("text", { x: M.l - 8, y: M.t + ch * (i + 0.5) + 3, "text-anchor": "end", fill: "var(--ink)", "font-size": 11 }); ty.textContent = sp.common; svg.appendChild(ty);
+      metrics.forEach((mn, j) => {
+        const z = sp.z[j], v = sp.vals[j], x = M.l + cw * j, y = M.t + ch * i;
+        const g = el("g", { tabindex: 0, role: "img", "aria-label": `${sp.common} ${mn} ${v}` });
+        g.appendChild(el("rect", { x: x + 1.5, y: y + 1.5, width: cw - 3, height: ch - 3, rx: 3, fill: zcol(z), stroke: "var(--card)", "stroke-width": 1 }));
+        const dark = z != null && Math.abs(z) > 1.1;
+        const vt = el("text", { x: x + cw / 2, y: y + ch / 2 + 3.5, "text-anchor": "middle", "font-size": 10.5, fill: dark ? "#fff" : "#17241f" });
+        vt.textContent = v == null ? "—" : (Math.abs(v) >= 10 ? Math.round(v) : v.toFixed(2)); g.appendChild(vt);
+        const tt = e => tip.show(`<span class="tt-t">${sp.common}</span>${mn}: <b>${v == null ? "n/a" : v}</b>${z == null ? "" : ` &nbsp;·&nbsp; z = ${signed(z)}`}`, e.clientX, e.clientY);
+        g.addEventListener("mousemove", tt); g.addEventListener("mouseleave", () => tip.hide());
+        g.addEventListener("focus", () => tip.show(`${sp.common} ${mn} ${v}`, x + cw, y + ch)); g.addEventListener("blur", () => tip.hide());
+        svg.appendChild(g);
+      });
+    });
+  }
+
   /* ===================== BOOT ===================== */
-  Promise.all([load("assets/data/meta.json"), load("assets/data/skill.json"),
-               load("assets/data/niche.json")])
+  const j = n => load(`assets/data/${n}.json`);
+  Promise.all([j("meta"), j("skill"), j("niche")])
     .then(([meta, sk, nch]) => {
       window.GOC.species = meta.species;
       window.GOC.meta = meta;
-      niche(nch); skill(sk); frontiers();
+      niche(nch); skill(sk); frontiers(); fig4b(meta);
       window.dispatchEvent(new CustomEvent("goc-data-ready"));
+      // secondary interactive panels — load independently so one failure can't
+      // break the others or the primary charts
+      j("fig2c").then(fig2c).catch(e => console.error("fig2c", e));
+      j("fig3b").then(fig3b).catch(e => console.error("fig3b", e));
+      j("fig4d").then(fig4d).catch(e => console.error("fig4d", e));
+      j("risk_grid").then(fig4a).catch(e => console.error("fig4a", e));
     })
     .catch(err => { console.error("chart data load failed", err); frontiers(); });
 })();

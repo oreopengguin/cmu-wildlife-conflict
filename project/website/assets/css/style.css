@@ -167,6 +167,21 @@ h3{font-size:clamp(20px,2.4vw,27px);margin:1.4em 0 .4em}
 .sdm-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .sdm-readout{font-family:var(--mono);font-size:12px;color:var(--slate);min-height:1.4em}
 
+/* ---- generic interactive map viewer (corridor / risk) ---- */
+.map-stage{position:relative;border-radius:12px;overflow:hidden;background:var(--card2);
+  aspect-ratio:468/342;border:1px solid var(--line);cursor:crosshair}
+.map-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.map-marks{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;width:20px;height:20px;transform:translate(-50%,-50%);border-radius:50%;
+  border:2px solid #57d0f0;box-shadow:0 0 0 2px rgba(10,15,25,.4);cursor:pointer;pointer-events:auto;
+  background:rgba(10,20,35,.15);transition:transform .12s ease, box-shadow .12s ease}
+.pin:hover,.pin.on{transform:translate(-50%,-50%) scale(1.4);
+  box-shadow:0 0 0 3px rgba(10,15,25,.5),0 0 12px #57d0f0;z-index:2}
+.pin .rk{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--mono);
+  font-size:9px;font-weight:700;color:#e6faff;pointer-events:none}
+.viz-row{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:820px){.viz-row{grid-template-columns:1fr}}
+
 /* ---- future research cards ---- */
 .frontier{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:24px}
 .fcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;
@@ -224,10 +239,3 @@ footer{border-top:1px solid var(--line);padding:44px 0 72px;color:var(--slate);f
 .mini-btn:hover{border-color:var(--ink);transform:translateY(-1px)}
 .mini-btn[aria-pressed="true"]{background:color-mix(in srgb,var(--ember) 14%,transparent);
   border-color:var(--ember);color:var(--ember)}
-
-/* ---- figure panel hover ---- */
-.fig-hl{position:absolute;pointer-events:none;border:1.5px solid var(--ember);
-  background:color-mix(in srgb,var(--ember) 7%,transparent);border-radius:8px;opacity:0;
-  transition:opacity .12s ease, left .09s ease, top .09s ease, width .09s ease, height .09s ease;z-index:2}
-.fig-caphint{color:var(--ember);font-family:var(--mono);font-size:11.5px;white-space:nowrap}
-@media(pointer:coarse){.fig-caphint{display:none}}

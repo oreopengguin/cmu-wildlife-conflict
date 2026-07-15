@@ -87,7 +87,7 @@
     as its exact equivalent, a penalized Poisson point process — and fit it for seven
     European mammals from 57,838 GBIF records.</p>
 
-  <div class="figure" data-panels="a · Records — georeferenced sightings of all 7 taxa across Europe|b · Niches — realized climatic niches in bioclim-PCA space|c · Pipeline — the conflict-data-free Gibbs → transport → topology → risk schematic|d · Skill — block cross-validation AUC &amp; Boyce per species"><img alt="Figure 1: framework and data" src="assets/img/figure1_framework.jpg" loading="lazy">
+  <div class="figure"><img alt="Figure 1: framework and data" src="assets/img/figure1_framework.jpg" loading="lazy">
     <div class="cap"><b>Figure 1 — Framework &amp; data.</b> Occurrence density and realized
       climatic niches; the Gibbs&rarr;transport&rarr;topology pipeline; and spatial
       cross-validation skill. Colours use the Okabe–Ito colourblind-safe palette with
@@ -143,7 +143,7 @@
   <p class="sub">Three geometric tools turn "where habitat is" into "where it must go, whether
     it can get there, and how it breaks apart" — the machinery that makes conflict predictable.</p>
 
-  <div class="figure" data-panels="a · Gain vs loss — present vs future habitat (SSP2-4.5)|b · Displacement — the entropic optimal-transport field T(x)−x|c · Poleward intensity — required range shift vs latitude, per species|d · Friction — habitat pushed up the human-pressure gradient"><img alt="Figure 2: optimal transport" src="assets/img/figure2_transport.jpg" loading="lazy">
+  <div class="figure"><img alt="Figure 2: optimal transport" src="assets/img/figure2_transport.jpg" loading="lazy">
     <div class="cap"><b>Figure 2 — Entropic displacement.</b> Present vs future habitat; the
       optimal-transport displacement field (streamlines flowing poleward); the poleward
       intensification of shift; and the <b>Coexistence Friction</b> field where habitat is
@@ -155,11 +155,32 @@
     <div class="panel d"><h4>d · Friction</h4><p>F(x)=&langle;displacement, &nabla;human-pressure&rangle;<sub>+</sub> — the conflict-pressure field.</p></div>
   </div>
 
-  <div class="figure" data-panels="a · Current — climate-forced movement routed through the landscape|b · Corridors — pinch-points where current crosses human pressure|c · Persistence — the persistence diagram of the range's shape|d · Simplification — topological simplification of the habitat"><img alt="Figure 3: connectivity and topology" src="assets/img/figure3_connectivity_topology.jpg" loading="lazy">
+  <!-- interactive Figure 2c: hover a line to read its species + shift -->
+  <div class="viz" id="fig2cViz">
+    <div class="viz-head"><h4>Interactive · Figure 2c — poleward intensification</h4>
+      <span class="hint">hover a line for its species &amp; the shift at that latitude</span></div>
+    <svg class="chart-svg" id="fig2cChart" viewBox="0 0 760 440" role="img" aria-label="Interactive per-species range shift versus latitude"></svg>
+    <div class="legend-chips" id="fig2cLegend"></div>
+    <p class="cap">Each line is one taxon's <b>median required range shift</b> across latitude bins — the same per-species series drawn as coloured lines in Figure 2c.</p>
+  </div>
+
+  <div class="figure"><img alt="Figure 3: connectivity and topology" src="assets/img/figure3_connectivity_topology.jpg" loading="lazy">
     <div class="cap"><b>Figure 3 — Connectivity &amp; topology.</b> A spectral graph-Laplacian
       solve routes forced movement into discrete conflict corridors and pinch-points;
       cubical persistent homology shows the range's interior gaps (H<sub>1</sub> loops)
       rising from 2,389 to 2,536.</div></div>
+
+  <!-- interactive Figure 3b: hover the pinch-point rings or the map -->
+  <div class="viz" id="fig3bViz">
+    <div class="viz-head"><h4>Interactive · Figure 3b — conflict corridors &amp; pinch-points</h4>
+      <span class="hint">hover a ring for its pinch-point · hover the map for intensity</span></div>
+    <div class="map-stage" id="fig3bStage">
+      <img id="fig3bImg" alt="Conflict-corridor intensity map of Europe">
+      <div class="map-marks" id="fig3bMarks"></div>
+    </div>
+    <p class="sdm-readout" id="fig3bReadout">Hover the map to read conflict-corridor intensity; hover a ring for a ranked pinch-point.</p>
+    <p class="cap">Corridor intensity = movement current × human pressure. The <b>16 rings</b> mark the strongest pinch-points — exactly the circles in Figure 3b.</p>
+  </div>
 </section>
 
 <!-- ===================== RESULTS (large) ===================== -->
@@ -233,12 +254,38 @@
       <b>Poland–Belarus lowland belt</b>.</p>
   </div>
 
-  <div class="figure" style="margin-top:34px" data-panels="a · Risk map — emergent human–wildlife conflict risk (2081–2100)|b · Shift test — predicted vs observed range shift (ρ = 0.64)|c · Interface test — friction predicts realized interface (p = 0.0005)|d · Decomposition — per-species contribution of the three signals"><img alt="Figure 4: risk and validation" src="assets/img/figure4_risk_validation.jpg" loading="lazy">
+  <div class="figure" style="margin-top:34px"><img alt="Figure 4: risk and validation" src="assets/img/figure4_risk_validation.jpg" loading="lazy">
     <div class="cap"><b>Figure 4 — Coexistence Risk Index &amp; validation.</b> The fused risk index
       is brightest over the peri-Alpine arc, the Poland–Belarus lowland belt, and the north-eastern
       Baltic (Gulf-of-Finland) corner; the validation panels show the two out-of-sample tests above.</div></div>
 
-  <div class="figure" data-panels="a · Scenario — range shift scales with emissions|b · Invariance — the conflict pattern is scenario-invariant (r = 0.98)|c · Stability — OT shift stable across grid and regularization settings|d · Solver — satisfies the max-entropy constraint (r = 0.99998)"><img alt="Figure S1: robustness" src="assets/img/figureS1_robustness.jpg" loading="lazy">
+  <!-- interactive Figure 4a: hover the risk map -->
+  <div class="viz" id="fig4aViz">
+    <div class="viz-head"><h4>Interactive · Figure 4a — Coexistence Risk map</h4>
+      <span class="hint">hover anywhere to read the relative risk</span></div>
+    <div class="map-stage" id="fig4aStage">
+      <img id="fig4aImg" src="assets/img/risk_map.png" alt="Coexistence Risk Index map of Europe">
+      <div class="map-marks" id="fig4aMarks"></div>
+    </div>
+    <p class="sdm-readout" id="fig4aReadout">Hover the map to read the relative Coexistence Risk Index (0–100, percentile-scaled as displayed).</p>
+  </div>
+
+  <div class="viz-row">
+    <!-- interactive Figure 4b: hover a species point -->
+    <div class="viz" id="fig4bViz">
+      <div class="viz-head"><h4>Interactive · Figure 4b — predicted vs observed shift</h4>
+        <span class="hint">hover a point</span></div>
+      <svg class="chart-svg" id="fig4bChart" viewBox="0 0 560 470" role="img" aria-label="Predicted versus observed latitudinal range shift"></svg>
+    </div>
+    <!-- interactive Figure 4d: hover a decomposition cell -->
+    <div class="viz" id="fig4dViz">
+      <div class="viz-head"><h4>Interactive · Figure 4d — risk decomposition</h4>
+        <span class="hint">hover a cell for the exact value</span></div>
+      <svg class="chart-svg" id="fig4dChart" viewBox="0 0 560 470" role="img" aria-label="Per-species risk decomposition heatmap"></svg>
+    </div>
+  </div>
+
+  <div class="figure"><img alt="Figure S1: robustness" src="assets/img/figureS1_robustness.jpg" loading="lazy">
     <div class="cap"><b>Figure S1 — Robustness &amp; verification.</b> Scenario scaling, friction
       scenario-invariance (r = 0.98), optimal-transport stability, and the solver constraint check
       (r = 0.99998).</div></div>

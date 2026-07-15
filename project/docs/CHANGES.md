@@ -137,6 +137,31 @@ Changes made (site + manuscript), all matching the data above:
   and names the panel using that panel's **own title** (carried in `data-panels`) — pure
   identification, no new information.
 
+## Website — interactivity pass 4: data-driven figure hover (no numerical result changed)
+
+Replaced the earlier *panel-caption* hover (which only said what a panel was) with genuine
+**element-specific, real-data** interactive recreations of five analytical panels — hovering an
+element now reveals *its own value*. Every number is read straight from the committed pipeline
+output; nothing is invented.
+
+- **Removed** the `data-panels` quadrant-caption hover (attributes, JS, CSS).
+- **Interactive Figure 2c** (`fig2c.json`): per-species median required range-shift vs latitude.
+  Hover a line → that taxon's name and the shift (km) at the hovered latitude; other species dim.
+  Series computed exactly as `fig2.py::panel_c`.
+- **Interactive Figure 3b** (`fig3b.json` + `corridor_map.png`): the conflict-corridor field with
+  the **16 pinch-point rings** (the exact top-16 local maxima `fig3.py::panel_b` marks). Hover a
+  ring → its rank, location, and corridor intensity; hover the map → intensity at that cell.
+- **Interactive Figure 4a** (reuses `risk_grid.json`): hover the CRI map → relative risk (0–100,
+  the same percentile scaling used to render the map).
+- **Interactive Figure 4b** (reuses `meta.json`): predicted-vs-observed Δlatitude scatter. Hover a
+  point → species + observed/predicted °; the grey-wolf recolonization outlier is annotated.
+- **Interactive Figure 4d** (`fig4d.json`): per-species risk decomposition heatmap over the same
+  five signals `fig4.py::panel_d` tabulates (W-shift, Δpatches, topo shift, mean friction,
+  interface AUC). Hover a cell → species + metric + raw value + across-species z-score.
+
+All new exports are produced by `src/export_web.py` (`export_fig2c`, `export_fig3b`, `export_fig4d`)
+and are regenerable via `run_pipeline.sh`; `verify.sh` checks the new assets.
+
 ## Reproducibility
 
 - `src/export_web.py` regenerates all website data/images from committed results.
