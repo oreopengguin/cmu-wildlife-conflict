@@ -249,6 +249,7 @@
         maximum-entropy property to <b>r = 0.99998</b>.</p></div></div>
   </div>
 
+
   <div class="callout">
     <div class="eyebrow">An honest caveat — where the map can mislead</div>
     <p style="margin:10px 0 0">Not every bright cell is a real hotspot. <b>Coastal and island cells pick up
@@ -265,7 +266,12 @@
     <div class="cap"><b>Figure 4 — Coexistence Risk Index &amp; validation.</b> The fused risk index
       is brightest over the peri-Alpine arc, the Poland–Belarus lowland belt, and the north-eastern
       Baltic (Gulf-of-Finland) corner; the validation panels show the two out-of-sample tests above.</div></div>
-
+  <div class="panels">
+    <div class="panel"><h4>Figure 4a – Our main result</h4><p>our Coexistence Risk Index plotted on a map across Europe. </p></div>
+    <div class="panel b"><h4>Figure 4b – How well does our model predict movement?</h4><p>We compare the actual observed latitude change from the 7 species in the past to what our model would have predicted. There is a strong correlation between what our model predicted and what actually happened. </p></div>
+    <div class="panel c"><h4>Figure 4c – Is our friction model actually accurate?</h4><p>If it was accurate, our model of friction should able to predict where animals will be sighted much better than just random chance. We can see this in this graph, as our model has a p-value of 0.0005 when compared to the distribution of random shuffles.</p></div>
+    <div class="panel d"><h4>Figure 4d – What is the main risk for each species?</h4><p>This graph compares the different threats to each species.</p></div>
+  </div>
   <!-- interactive Figure 4a: hover the risk map · switch community / per-species -->
   <div class="viz" id="fig4aViz">
     <div class="viz-head"><h4 id="fig4aTitle">Interactive · Figure 4a — Coexistence Risk map</h4>
@@ -290,6 +296,12 @@
     <div class="cap"><b>Figure S1 — Robustness &amp; verification.</b> Scenario scaling, friction
       scenario-invariance (r = 0.98), optimal-transport stability, and the solver constraint check
       (r = 0.99998).</div></div>
+  <div class="panels">
+    <div class="panel"><h4>Figure S1a – How does the shift change depending on how intense climate change is?</h4><p>We used SSP2-4.5 to predict how climate will change in our model - which assumes only moderate climate change into 2100. If we were to use SSP5-8.5, which assumes high rates of climate change, then we can see the shifts will greatly increase.</p></div>
+    <div class="panel b"><h4>Figure S1b – How does our friction change depending on how intense climate change is?</h4><p>Our friction results for SSP2-4.5 and SSP5-8.5 are very strongly correlated, meaning that nearly all of the high-risk points for species that our model calculated will likely still be very high-risk, no matter how much the climate changes.</p></div>
+    <div class="panel c"><h4>Figure S1c – How does changing parameters affect the predicted shift?</h4><p>Entropic regularization determines how spread out our model will be when calculating the optimal transport, and grid coarsening determines how big each of our cells are on the map. Changes to both of these set variables have low coefficients of variation.</p></div>
+    <div class="panel d"><h4>Figure S1d – How accurate is our Maxent model?</h4><p>The features of our predicted high suitability areas nearly perfectly match the empirical features of all real sightings.</p></div>
+  </div>
 </section>
 <br><br>
 <!-- ===================== SIGNIFICANCE ===================== -->
