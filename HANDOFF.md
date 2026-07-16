@@ -192,7 +192,9 @@ Global Human Modification. Domain = Europe, bbox lon[-12,40] lat[34,72], grid 1/
   Pearson r = 0.39 (n=7). 5/7 taxa observed poleward. **Grey wolf is the one outlier** —
   its recent range change is legal-protection-driven *recolonization* (Chapron et al. 2014),
   a known non-climate confound. Observed shifts come from splitting GBIF into a 1990–2007
-  epoch (`occ_hist_*`) vs the recent `occ_*` records.
+  epoch (`occ_hist_*`) vs the recent `occ_*` records. **Robustness note (honest):** removing
+  the wolf does *not* inflate the fit — excluding it gives ρ = 0.54, r = 0.34 (n=6), slightly
+  lower, so the agreement is not an artefact of that one point (shown on Fig 4b + results finding 4).
 - **Validation 2 (interface):** Coexistence Friction predicts which human-dominated cells
   hold recent occurrences — standardized association 0.13, **permutation p = 0.0005**
   (4,618 interface cells).
@@ -300,8 +302,9 @@ Individual stages (`cd project/src && ../.venv/bin/python X.py`):
 - `figure3_connectivity_topology` — (a) movement current, (b) conflict corridors + pinch
   points, (c) persistence diagram, (d) persistence landscapes.
 - `figure4_risk_validation` — (a) CRI map + hotspot stars + cities, (b) predicted-vs-observed
-  shift scatter (wolf outlier annotated, Spearman + Pearson), (c) friction–interface
-  permutation null, (d) per-species risk heatmap.
+  shift scatter (wolf outlier annotated; Spearman + Pearson for all n=7 **and** with the grey
+  wolf excluded, n=6), (c) friction–interface permutation null, (d) per-species risk heatmap
+  (four signals: W-shift, Δpatches, topo shift, friction — the interface-AUC column was removed).
 - `figureS1_robustness` — (a) scenario dumbbell, (b) friction scenario-invariance scatter
   (r=0.98), (c) OT reg + grid sensitivity, (d) MaxEnt constraint check (r=0.99998).
 - `figureSDM_present_future` — one map per species: filled present suitability, dashed 2090

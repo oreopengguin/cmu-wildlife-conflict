@@ -228,6 +228,25 @@ value still traces to the same committed pipeline output.
   flagship figure, so no information was lost. `verify.sh` updated accordingly (no longer
   checks `fig4d.json`; now 40 checks, 0 failed).
 
+## Figures & results — pass 7 (Fig 4b outlier-excluded correlations; Fig 4d column removed)
+
+No numerical result changed; the added statistics are recomputed from the same committed
+`summary.json` range-shift values. Nothing was invented, inflated, or cherry-picked.
+
+- **Fig 4b (+ results finding 4) — grey-wolf-excluded correlations added.** The
+  predicted-vs-observed range-shift panel now reports, alongside the full-sample statistics
+  (Spearman ρ = 0.64, Pearson r = 0.39; n = 7), the same correlations computed with the grey
+  wolf — the recolonization-driven outlier — removed: **Spearman ρ = 0.54, Pearson r = 0.34
+  (n = 6)**. Framed honestly: excluding the outlier does **not** inflate the agreement — it is
+  slightly *lower* — so the match does not depend on that single point (rather than cherry-picking
+  a higher post-exclusion number). Computed dynamically in `fig4.py::panel_b`; the identical
+  numbers appear in finding 4 on the results page (`index.html`).
+- **Fig 4d — interface-AUC column removed.** The per-species risk-decomposition heatmap no
+  longer includes the "IV-AUC" (interface AUC) column. The remaining four signals (W-shift,
+  Δpatches, topo shift, mean friction) are unchanged — each column is z-scored independently, so
+  their colours and values are identical to before. `fig4.py::panel_d`.
+- Regenerated `figure4_risk_validation` PNG/PDF + web JPG from the committed results.
+
 ## Per-species Coexistence Risk (pass 4) — new analysis, same recipe
 
 Added **per-species CRI maps** so a viewer can see *which taxon drives each hotspot*.

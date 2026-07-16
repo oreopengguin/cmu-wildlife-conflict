@@ -54,7 +54,7 @@ def panel_a(ax, A):
 def panel_b(ax, A):
     s = FD.load_summary()
     sps = FD.species_present(A)
-    xs, ys, cols, labs = [], [], [], []
+    xs, ys, cols, labs, keys = [], [], [], [], []
     for sp in sps:
         r = s["species"][sp]
         if r["observed_shift"] is None:
@@ -62,7 +62,8 @@ def panel_b(ax, A):
         xs.append(r["observed_shift"]["d_lat"])
         ys.append(r["predicted_shift"]["d_lat"])
         cols.append(C.SPECIES_COLOR[sp]); labs.append(C.SPECIES_COMMON[sp])
-    xs = np.array(xs); ys = np.array(ys)
+        keys.append(sp)
+    xs = np.array(xs); ys = np.array(ys); keys = np.array(keys)
     lim = np.array([min(xs.min(), ys.min()), max(xs.max(), ys.max())])
     pad = 0.1 * (lim[1] - lim[0] + 1e-9)
     lim = lim + np.array([-pad, pad])
@@ -77,11 +78,17 @@ def panel_b(ax, A):
         r, p = pearsonr(xs, ys)
         rho, _ = spearmanr(xs, ys)
         n_pole = int(np.sum(xs > 0))
+        # same correlations with the grey-wolf recolonization outlier removed,
+        # shown for transparency: excluding it does NOT inflate the agreement.
+        nw = keys != "Canis lupus"
+        rw, _ = pearsonr(xs[nw], ys[nw])
+        rhow, _ = spearmanr(xs[nw], ys[nw])
         ax.text(0.04, 0.96,
-                f"Spearman ρ = {rho:.2f}   Pearson r = {r:.2f}\n"
+                f"Spearman ρ = {rho:.2f}   Pearson r = {r:.2f}   (n = {len(xs)})\n"
+                f"excl. grey wolf:  ρ = {rhow:.2f}   r = {rw:.2f}   (n = {int(nw.sum())})\n"
                 f"{n_pole}/{len(xs)} taxa shifted poleward, as predicted\n"
                 f"Grey wolf: recolonization-driven outlier",
-                transform=ax.transAxes, va="top", fontsize=6.9,
+                transform=ax.transAxes, va="top", fontsize=6.5,
                 bbox=dict(boxstyle="round,pad=0.35", fc="#f4f6f9", ec=FS.FAINT, lw=0.6))
     ax.set_xlabel(r"Observed $\Delta$latitude, 1990–2007 $\rightarrow$ 2008–2026 (°)")
     ax.set_ylabel("OT-predicted Δlatitude (°)")
@@ -131,8 +138,7 @@ def panel_c(ax, A):
 
 def panel_d(ax, A):
     s = FD.load_summary(); sps = FD.species_present(A)
-    metrics = ["W_shift_km", "Δfragmentation", "topo_change_W1",
-               "mean_friction", "interface_AUC"]
+    metrics = ["W_shift_km", "Δfragmentation", "topo_change_W1", "mean_friction"]
     M = np.full((len(sps), len(metrics)), np.nan)
     for i, sp in enumerate(sps):
         r = s["species"][sp]
@@ -141,12 +147,11 @@ def panel_d(ax, A):
         M[i, 2] = r["topo_change_W1"]
         fr = A[f"friction__{sp}"]
         M[i, 3] = np.nanmean(fr[np.isfinite(fr) & (fr > 0)]) if np.isfinite(fr).any() else np.nan
-        M[i, 4] = r["interface"]["auc_friction"] if r["interface"] else np.nan
     # z-score columns for comparability
     Z = (M - np.nanmean(M, axis=0)) / (np.nanstd(M, axis=0) + 1e-9)
     im = ax.imshow(Z, aspect="auto", cmap=FS.DIVSHIFT, vmin=-2, vmax=2)
     ax.set_xticks(range(len(metrics)))
-    ax.set_xticklabels(["W-shift", "Δpatches", "topo shift", "friction", "IV-AUC"],
+    ax.set_xticklabels(["W-shift", "Δpatches", "topo shift", "friction"],
                        rotation=30, ha="right", fontsize=6.6)
     ax.set_yticks(range(len(sps)))
     ax.set_yticklabels([C.SPECIES_COMMON[sp] for sp in sps], fontsize=7)
