@@ -165,7 +165,7 @@
       plain: "The map <b>already marks the funnels</b> where animals get bottlenecked near people — so build the crossings there first." },
     { tag: "Coupled transport", title: "Move predator and prey together",
       body: "Extend the optimal-transport step to shift a predator's range and its prey's range at once. New conflict triangles appear where both land near people — e.g. wolves following deer into farmland.",
-      plain: "Slide the <b>wolf and the deer north at the same time</b>; trouble is wherever both end up next to a town." },
+      plain: "Compare the <b>wolf and the deer</b> on the interactive slider map; trouble is wherever both end up together near a community of people." },
     { tag: "Early-warning topology", title: "Count the holes before a range collapses",
       body: "Track the persistent-homology loops (interior gaps) of a range through time. A rising number of holes is a leading signal that a range is fragmenting toward collapse — an alarm that fires before the population crashes.",
       plain: "As a habitat starts breaking into islands, <b>holes appear first</b>. Counting them warns us early." },
