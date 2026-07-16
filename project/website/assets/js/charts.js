@@ -171,7 +171,7 @@
       plain: "As a habitat starts breaking into islands, <b>holes appear first</b>. Counting them warns us early." },
     { tag: "Inverse transport", title: "Plant a few reserves so animals can flow north",
       body: "Flip the problem around: instead of measuring friction, solve for the handful of new stepping-stone patches that would lower total transport cost the most — the cheapest reserves that let a species migrate poleward without hitting cities.",
-      plain: "Ask the model: <b>where do a few small new parks</b> let wildlife move north most smoothly?" },
+      plain: "For example, identify the minimal set of reserves that would allow a species to migrate northward while avoiding conflict with humans." },
     { tag: "Two moving fields", title: "When people move too",
       body: "People are redistributing as well. Treat human expansion as its own transport field and compute where the wildlife field and the human field collide — conflict as the intersection of two moving measures, not one shifting into a fixed backdrop.",
       plain: "Both <b>wildlife and people are on the move</b>; the worst spots are where the two flows crash into each other." },
