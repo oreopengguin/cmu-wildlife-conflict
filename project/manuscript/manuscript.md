@@ -80,7 +80,7 @@ The **Coexistence Risk Index** fuses the three geometric signals as CRI(x) = w�
 
 ### 4.1 Suitability models are well-calibrated (Figure 1)
 
-Across 37,070 terrestrial cells and 57,838 georeferenced records (thinned to 509–2,680 presence cells per species), the from-scratch elastic-net MaxEnt/PPP models achieve spatial-block-CV AUC of 0.76–0.92 (mean 0.84) and continuous Boyce indices of 0.83–0.99 (Figure 1d). Skill tracks ecology: the climate-restricted, range-expanding golden jackal is most discriminable (AUC 0.92), the ubiquitous generalist red fox least (AUC 0.76). The realized climatic niches (Figure 1b) overlap in a shared cool-temperate envelope, as expected for co-occurring European mammals.
+Across 37,070 terrestrial cells and 57,838 georeferenced records (thinned to 509–2,680 presence cells per species), the from-scratch elastic-net MaxEnt/PPP models achieve spatial-block-CV AUC of 0.76–0.92 (mean 0.84) and continuous Boyce indices of 0.83–0.99 (Figure 1d). Skill tracks ecology: the climate-restricted, range-expanding golden jackal is most discriminable (AUC 0.92), the ubiquitous generalist red fox least (AUC 0.76). The realized climatic niches (Figure 1b) are shown in the plane of the first two principal components of the bioclimatic predictors, which together capture **79 %** of the climatic variation across the domain (PC1 44 %, PC2 35 %), so a two-dimensional projection is an adequate summary of the eight-variable climate space. In that plane the seven niches overlap in a shared cool-temperate envelope, as expected for co-occurring European mammals, with the climate-restricted taxa occupying visibly tighter density contours than the generalists.
 
 ### 4.2 Climate forces a coherent poleward displacement (Figure 2)
 
