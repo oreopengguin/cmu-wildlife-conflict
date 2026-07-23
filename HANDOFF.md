@@ -377,8 +377,13 @@ pinch-point circles w/ `place` labels; paired with `img/corridor_map.png`), `fig
 (named CRI bright-cluster labels + extent; `export_fig4a` filters out domain-edge cells and
 lone spikes — a peak is only labelled if its 150 km neighbourhood mean CRI > 0.4),
 `sdm_grids.json` (coarse suitability
-  for hover, base64), `risk_grid.json` (coarse CRI).
-- `assets/img/` — figure JPGs, `risk_map.png` (clean CRI map for the game), `sdm/*.png`.
+  for hover, base64), `risk_grid.json` (coarse **community** CRI), and
+  `cri_species.json` (coarse **per-species** CRI grids — written by `species_cri.py`, not
+  `export_web.py` — powering the Community/per-species tabs on the interactive Figure 4a).
+- `assets/img/` — figure JPGs, `risk_map.png` (community CRI map, also used by the game),
+  `corridor_map.png`, `sdm/*.png` (14 per-species present/future), and `cri/*.png`
+  (7 per-species Coexistence-Risk maps).
+- `sources.html` — the full works-cited page, linked from the site and cited in the manuscript.
 
 **Data flow (end to end):**
 ```
@@ -576,3 +581,9 @@ All fit the existing `transport.py` machinery.
 6. Commit **without** a `Co-Authored-By` trailer; push to `main`; confirm Vercel redeployed.
 7. **Update THIS file (`HANDOFF.md`)** — the status line, any new files/decisions/gotchas —
    and extend `verify.sh` if you added assets it should check.
+8. **Keep the manuscript a superset of the website.** Every claim, number, figure reading and
+   caveat shown on the site must also appear in `project/manuscript/manuscript.md` (the
+   manuscript may — and should — go deeper and carry more nuance, but must never say *less*).
+   If you add a site section, add the matching Methods/Results/Discussion text; if you change
+   a method in code, fix the Methods prose (a stale "convolutional Sinkhorn" description
+   survived there once — the implemented method is coarse-grid explicit-cost Sinkhorn).

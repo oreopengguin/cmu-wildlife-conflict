@@ -270,6 +270,36 @@ once per species instead of on the community-aggregated suitability.
   St. Petersburg → **wolf, lynx, roe deer, red fox**; Bosphorus/SE → **golden jackal, wild
   boar**. `verify.sh` updated to check the new assets.
 
+## Manuscript ↔ website synchronisation (pass 5)
+
+Audited the manuscript against the live site so the paper is a **superset** of the website
+(the manuscript may go deeper; it must never say less). **No numerical result changed.**
+
+- **Corrected a genuine Methods inaccuracy.** §3.2 still described the optimal transport as
+  **convolutional (heat-kernel) Sinkhorn** — the approach that was *implemented first and then
+  abandoned*. The code (`transport.py`) actually uses **coarse-grid entropic OT with an explicit
+  great-circle cost matrix** (block-average ×5, ε = 0.02, POT `ot.sinkhorn`, barycentric map,
+  bilinear upsample). §3.2 now describes the real method, and — for transparency — records that
+  the convolutional variant was rejected because a single Gaussian kernel cannot move mass
+  across the 100–500 km gaps real range shifts require (it collapsed to the domain centroid and
+  produced spurious equatorward displacements). The stale wording in §6 was fixed too.
+- **Added to the manuscript** (all previously only on the site or in this analysis):
+  per-species Coexistence Risk (Methods §3.5 + new Results §4.6, with the taxon→hotspot
+  attribution); the **component decomposition** of each hotspot (Alps gain-driven +4.01;
+  NE Baltic current-driven +3.20 with the Gulf-of-Finland/Ladoga land-bridge explanation and
+  100th-percentile current; Poland–Belarus current-driven +1.71; Scotland friction-only +2.70 =
+  artifact) in §4.4; a **Significance** paragraph in the Discussion; the **six Frontier
+  directions** from the website expanded in the Outlook; and three further **Limitations**
+  (conflict validated only via an interface *proxy* with IV-AUC ≈ 0.50–0.54; the CRI is a
+  *constructed*, relative index with chosen 1.0/0.8/0.8 weights; the human-pressure layer is
+  *static*). The Abstract now states the decomposition and per-species findings.
+- **§6 Data & code availability** rewritten to list every module (incl. `species_cri.py`,
+  `geolabels.py`), the committed results of record, the live interactive site, `sources.html`,
+  `HANDOFF.md`, `verify.sh` and this changelog. **References** now point to `sources.html`.
+- `HANDOFF.md` updated (full asset inventory incl. `cri_species.json`, `cri/*.png`,
+  `corridor_map.png`, `sources.html`) and a **manuscript-parity rule** added to its
+  maintenance checklist. Automated parity audit: 19/19 concepts present.
+
 ## Reproducibility
 
 - `src/species_cri.py` regenerates the per-species CRI maps + web assets from `analysis.npz`.
