@@ -57,9 +57,14 @@ if [ -x "$PY" ]; then
 else no "skipped (no venv)"; fi
 
 hdr "6. Git hygiene"
-if git log --all --pretty='%an %B' 2>/dev/null | grep -qi "claude\|anthropic\|co-authored"; then
-  no "co-author trailer / Claude reference found in history (must be sole contributor)"
-else ok "no co-author trailer anywhere in history"; fi
+# Only real contributor signals count: an actual "Co-Authored-By:" trailer LINE, or an
+# author/committer identity at anthropic.com. A commit MESSAGE that merely mentions
+# "claude" (e.g. "Add .claude to gitignore") is NOT a violation.
+CO_TRAILER=$(git log --all --pretty='%B' 2>/dev/null | grep -ciE '^[[:space:]]*co-authored-by:')
+ANTHRO_ID=$(git log --all --pretty='%ae%n%ce' 2>/dev/null | grep -ciE 'anthropic\.com')
+if [ "${CO_TRAILER:-0}" -gt 0 ] || [ "${ANTHRO_ID:-0}" -gt 0 ]; then
+  no "co-author trailer ($CO_TRAILER) or Anthropic author/committer ($ANTHRO_ID) in history (owner must be sole contributor)"
+else ok "no Co-Authored-By trailer or Anthropic identity anywhere in history"; fi
 git ls-files --error-unmatch HANDOFF.md >/dev/null 2>&1 && ok "HANDOFF.md is committed" || no "HANDOFF.md not committed"
 if git ls-files | grep -qE "project/data/|project/\.venv/"; then no "data/ or .venv/ leaked into git"; else ok "data/ and .venv/ correctly gitignored"; fi
 
